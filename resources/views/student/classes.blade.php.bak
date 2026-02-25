@@ -1,0 +1,131 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-bold text-2xl text-gray-800 leading-tight hidden lg:block">
+            {{ __('Kelas') }}
+        </h2>
+        <h2 class="font-bold text-2xl text-gray-800 leading-tight lg:hidden">
+            {{ __('Manajemen Kelas') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-6" x-data="{ searchQuery: '' }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Controls Area: Search, Filter, Sort -->
+            <div class="flex flex-col md:flex-row items-center md:items-center justify-between gap-4 mb-8">
+                
+                <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 items-start md:items-center">
+                    <!-- 'All' Button -->
+                    <button class="bg-[#5cb85c] hover:bg-[#4cae4c] text-white px-6 py-2 rounded-md shadow-sm transition-colors text-sm font-medium whitespace-nowrap">
+                        All
+                    </button>
+
+                    <!-- Search Input -->
+                    <div class="relative w-full md:w-64">
+                         <input type="text" 
+                               x-model="searchQuery"
+                               placeholder="Search" 
+                               class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#5cb85c] focus:border-transparent shadow-sm text-sm">
+                        <!-- Search Icon (Optional visual cue) -->
+                    </div>
+
+                    <!-- Sort Dropdown -->
+                    <div class="relative w-full md:w-auto">
+                        <select class="appearance-none bg-[#66bb6a] hover:bg-[#5cb85c] text-white pl-4 pr-10 py-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5cb85c] text-sm font-medium w-full cursor-pointer">
+                            <option value="name">Sort by course name</option>
+                            <option value="date">Sort by date</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Grid uses Alpine for client-side filtering if needed, but for now assuming backend data or full list + search filtering -->
+            <!-- We can use x-show based on searchQuery simple check -->
+            
+            @php
+                $classes = $classes ?? [
+                    (object)[
+                        'id' => 1,
+                        'name' => 'Sejarah Indonesia',
+                        'class_name' => '12 Mipa B',
+                        'image' => 'https://cdn.pixabay.com/photo/2017/08/06/22/01/books-2596809_1280.jpg',
+                    ],
+                    (object)[
+                        'id' => 2,
+                        'name' => 'Matematika Umum',
+                        'class_name' => '12 Mipa B',
+                        'image' => 'https://cdn.pixabay.com/photo/2015/11/19/21/10/glasses-1052010_1280.jpg',
+                    ],
+                    (object)[
+                        'id' => 3,
+                        'name' => 'Biologi',
+                        'class_name' => '12 Mipa B',
+                        'image' => 'https://cdn.pixabay.com/photo/2013/07/12/19/16/newspaper-154444_1280.png',
+                    ]
+                ];
+            @endphp
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse ($classes as $class)
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer group transform hover:-translate-y-1 transition-transform"
+                     x-show="searchQuery === '' || '{{ strtolower($class->name) }}'.includes(searchQuery.toLowerCase())"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100">
+                    
+                    <a href="{{ route('student.classes.show', $class->id) }}" class="block h-full flex flex-col">
+                        <!-- Thumbnail -->
+                        <div class="h-40 bg-gray-200 w-full relative overflow-hidden">
+                            <!-- Image (using object-cover) -->
+                            <img src="{{ $class->image }}" alt="{{ $class->name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <!-- Overlay/Badge if needed later -->
+                        </div>
+
+                        <!-- Card Info -->
+                        <div class="p-5 flex-1 flex flex-col items-center text-center">
+                            <h3 class="text-xl font-bold text-gray-800 mb-1 group-hover:text-[#1a6341] transition-colors">
+                                {{ $class->name }}
+                            </h3>
+                            <p class="text-sm text-gray-500 font-medium">
+                                {{ $class->class_name }}
+                            </p>
+                        </div>
+                    </a>
+                </div>
+                @empty
+                <!-- Empty State -->
+                <div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
+                    <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    <p class="text-lg font-medium">Belum ada kelas yang diikuti</p>
+                </div>
+                @endforelse
+            </div>
+
+            <!-- Client-side No Results Message (Alpine) -->
+            <div x-cloak x-show="searchQuery !== '' && $el.previousElementSibling.querySelectorAll('[x-show=\'searchQuery === \'\' || ... \']').length === 0" 
+                 class="hidden py-8 text-center text-gray-500">
+                <!-- Note: The robust way to check visible breakdown in Alpine is tricky without extra counters. 
+                     For simplicity, we rely on the visual filtering. If user wants a 'No result found' for search specifically, 
+                     we would need a computed property in Alpine. -->
+            </div>
+            
+            <!-- Simple No Results logic for alpine search -->
+             <div class="hidden" :class="{ 'block': true, 'hidden': false }" 
+                  x-show="false" 
+                  x-effect="
+                    let visibleCount = 0;
+                    $el.previousElementSibling.querySelectorAll('[x-show]').forEach(el => {
+                         if(el.style.display !== 'none') visibleCount++;
+                    });
+                    // This is hard to do cleanly purely in x-effect with DOM querying, omitting for stability
+                  ">
+             </div>
+
+        </div>
+    </div>
+</x-app-layout>
