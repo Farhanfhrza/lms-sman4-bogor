@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use App\Models\Quiz;
 use App\Models\Student;
 use App\Models\QuizAnswer;
@@ -15,7 +16,7 @@ class QuizAttempt extends Model
 
     protected $fillable = [
         'quiz_id', 'student_id', 'started_at', 
-        'submitted_at', 'total_score', 'is_submitted'
+        'submitted_at', 'total_score', 'is_submitted', 'uuid'
     ];
 
     protected $casts = [
@@ -23,6 +24,28 @@ class QuizAttempt extends Model
         'submitted_at' => 'datetime',
         'is_submitted' => 'boolean',
     ];
+
+    /**
+     * Boot the model — auto-generate UUID on creation.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = Str::uuid()->toString();
+            }
+        });
+    }
+
+    /**
+     * Use UUID for route model binding instead of ID.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
 
     public function quiz()
     {
@@ -39,3 +62,4 @@ class QuizAttempt extends Model
         return $this->hasMany(QuizAnswer::class, 'attempt_id');
     }
 }
+

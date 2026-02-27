@@ -6,6 +6,11 @@ use App\Http\Controllers\TeacherCourseController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AcademicEventController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\AdminLogController;
+use App\Http\Controllers\AdminTeacherController;
+use App\Http\Controllers\AdminStudentController;
+use App\Http\Controllers\StudentQuizController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +29,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'check.email'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'check.email'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -44,6 +49,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/{assignment}/submit', [AssignmentController::class, 'submit'])->name('submit');
     });
 
+    // Student Quiz Routes (preview/start nested under course)
+    Route::prefix('courses/{course}/quizzes')->name('student.quiz.')->group(function () {
+        Route::get('/{quiz}', [StudentQuizController::class, 'show'])->name('show');
+        Route::post('/{quiz}/start', [StudentQuizController::class, 'start'])->name('start');
+    });
+    // Quiz attempt routes (UUID-based for security)
+    Route::prefix('quiz-attempts')->name('student.quiz.')->group(function () {
+        Route::get('/{attempt}', [StudentQuizController::class, 'take'])->name('take');
+        Route::post('/{attempt}/answer', [StudentQuizController::class, 'saveAnswer'])->name('saveAnswer');
+        Route::post('/{attempt}/submit', [StudentQuizController::class, 'submit'])->name('submit');
+    });
+
     // Academic Calendar Routes
     Route::prefix('academic-calendar')->name('academic-calendar.')->group(function () {
         Route::get('/', [AcademicEventController::class, 'index'])->name('index');
@@ -60,6 +77,28 @@ Route::middleware('auth')->group(function () {
     });
     Route::get('/kelas/{any}', function ($any) {
         return redirect()->route('courses.index');
+    });
+
+    // --- Admin Only ---
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/activity-logs', [AdminLogController::class, 'index'])->name('activity-logs');
+
+        // Teacher Management
+        Route::get('/teachers', [AdminTeacherController::class, 'index'])->name('teachers.index');
+        Route::get('/teachers/create', [AdminTeacherController::class, 'create'])->name('teachers.create');
+        Route::post('/teachers', [AdminTeacherController::class, 'store'])->name('teachers.store');
+        Route::get('/teachers/{teacher}/edit', [AdminTeacherController::class, 'edit'])->name('teachers.edit');
+        Route::put('/teachers/{teacher}', [AdminTeacherController::class, 'update'])->name('teachers.update');
+        Route::delete('/teachers/{teacher}', [AdminTeacherController::class, 'destroy'])->name('teachers.destroy');
+
+        // Student Management
+        Route::get('/students', [AdminStudentController::class, 'index'])->name('students.index');
+        Route::get('/students/create', [AdminStudentController::class, 'create'])->name('students.create');
+        Route::post('/students', [AdminStudentController::class, 'store'])->name('students.store');
+        Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
+        Route::get('/students/{student}/edit', [AdminStudentController::class, 'edit'])->name('students.edit');
+        Route::put('/students/{student}', [AdminStudentController::class, 'update'])->name('students.update');
+        Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('students.destroy');
     });
 
     // --- Teacher Course Management ---
@@ -92,6 +131,13 @@ Route::middleware('auth')->group(function () {
             Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->name('assignments.submissions');
             Route::get('/assignments/{assignment}/submissions/{student}', [AssignmentController::class, 'showSubmission'])->name('assignments.submissions.show');
             Route::put('/assignments/{assignment}/submissions/{student}/grade', [AssignmentController::class, 'gradeSubmission'])->name('assignments.submissions.grade');
+
+            // Quizzes CRUD
+            Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create');
+            Route::post('/quizzes', [QuizController::class, 'store'])->name('quizzes.store');
+            Route::get('/quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('quizzes.edit');
+            Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
+            Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
         });
     });
 });

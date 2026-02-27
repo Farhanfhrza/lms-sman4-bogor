@@ -164,7 +164,7 @@
                                         <div class="flex-1 min-w-0">
                                             <h4 class="font-semibold text-gray-900 mb-1">{{ $quiz->title }}</h4>
                                             @if($quiz->description)
-                                                <p class="text-sm text-gray-600 mb-2">{{ Str::limit($quiz->description, 80) }}</p>
+                                                <p class="text-sm text-gray-600 mb-2">{{ Str::limit(strip_tags($quiz->description), 80) }}</p>
                                             @endif
                                             <div class="flex items-center gap-4 text-xs text-gray-500">
                                                 @if($quiz->time_limit)
@@ -186,8 +186,8 @@
                                             $isAvailable = $quiz->end_at ? now()->isBefore($quiz->end_at) : true;
                                         @endphp
                                         @if($isAvailable)
-                                            <a href="#" 
-                                               class="flex-shrink-0 ml-4 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm font-medium">
+                                            <a href="{{ route('student.quiz.show', [$course, $quiz]) }}" 
+                                               class="flex-shrink-0 ml-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium">
                                                 Mulai Kuis
                                             </a>
                                         @else

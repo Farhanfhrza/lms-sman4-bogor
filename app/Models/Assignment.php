@@ -15,11 +15,12 @@ class Assignment extends Model
 
     protected $fillable = [
         'section_id', 'title', 'slug', 'description', 'file_url', 'due_date', 
-        'max_score', 'order_number', 'created_by'
+        'max_score', 'allow_late_submission', 'order_number', 'created_by'
     ];
 
     protected $casts = [
         'due_date' => 'datetime',
+        'allow_late_submission' => 'boolean',
     ];
 
     protected static function boot()

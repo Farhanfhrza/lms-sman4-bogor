@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassSubject;
 use App\Models\ClassSubjectSection;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -69,6 +70,8 @@ class TeacherCourseController extends Controller
             'general_info' => $request->general_info,
         ]);
 
+        ActivityLogger::log($course->id, 'updated', $course, 'Memperbarui informasi umum kelas');
+
         Cache::forget("class_detail_{$course->id}");
 
         return back()->with('success', 'Informasi umum berhasil diperbarui.');
@@ -88,13 +91,15 @@ class TeacherCourseController extends Controller
 
         $maxOrder = $course->sections()->max('order_number') ?? 0;
 
-        ClassSubjectSection::create([
+        $section = ClassSubjectSection::create([
             'class_subject_id' => $course->id,
             'title' => $request->title,
             'description' => $request->description,
             'order_number' => $maxOrder + 1,
             'is_published' => true,
         ]);
+
+        ActivityLogger::log($course->id, 'created', $section, 'Menambahkan BAB: ' . $section->title);
 
         Cache::forget("class_detail_{$course->id}");
 
@@ -123,6 +128,8 @@ class TeacherCourseController extends Controller
             'description' => $request->description,
         ]);
 
+        ActivityLogger::log($course->id, 'updated', $section, 'Memperbarui BAB: ' . $section->title);
+
         Cache::forget("class_detail_{$course->id}");
 
         return back()->with('success', 'BAB berhasil diperbarui.');
@@ -138,6 +145,8 @@ class TeacherCourseController extends Controller
         if ($section->class_subject_id !== $course->id) {
             abort(404);
         }
+
+        ActivityLogger::log($course->id, 'deleted', $section, 'Menghapus BAB: ' . $section->title);
 
         $section->delete();
 

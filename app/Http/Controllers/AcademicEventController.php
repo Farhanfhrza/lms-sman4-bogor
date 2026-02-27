@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicEvent;
 use App\Services\AcademicEventService;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
@@ -152,7 +153,9 @@ class AcademicEventController extends Controller
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $this->eventService->createEvent($validated, $user);
+        $event = $this->eventService->createEvent($validated, $user);
+
+        ActivityLogger::log(null, 'created', $event, 'Menambahkan event kalender: ' . $event->title);
 
         return redirect()->route('academic-calendar.index', [
             'year'  => \Carbon\Carbon::parse($validated['event_date'])->year,
@@ -177,6 +180,8 @@ class AcademicEventController extends Controller
 
         $this->eventService->updateEvent($event, $validated);
 
+        ActivityLogger::log(null, 'updated', $event, 'Memperbarui event kalender: ' . $event->title);
+
         return redirect()->route('academic-calendar.index', [
             'year'  => \Carbon\Carbon::parse($validated['event_date'])->year,
             'month' => \Carbon\Carbon::parse($validated['event_date'])->month,
@@ -192,6 +197,8 @@ class AcademicEventController extends Controller
 
         $year  = $event->event_date->year;
         $month = $event->event_date->month;
+
+        ActivityLogger::log(null, 'deleted', $event, 'Menghapus event kalender: ' . $event->title);
 
         $this->eventService->deleteEvent($event);
 

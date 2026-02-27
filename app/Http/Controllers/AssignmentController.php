@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\ClassSubject;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -201,16 +202,19 @@ class AssignmentController extends Controller
 
         $maxOrder = $section->assignments()->max('order_number') ?? 0;
 
-        Assignment::create([
+        $assignment = Assignment::create([
             'section_id' => $section->id,
             'title' => $request->title,
             'description' => $request->description,
             'due_date' => $dueDate,
             'max_score' => $request->max_score ?? 100,
+            'allow_late_submission' => $request->boolean('allow_late_submission'),
             'file_url' => $fileUrl,
             'order_number' => $maxOrder + 1,
             'created_by' => Auth::id(),
         ]);
+
+        ActivityLogger::log($course->id, 'created', $assignment, 'Menambahkan penugasan: ' . $assignment->title);
 
         Cache::forget("class_detail_{$course->id}");
 
@@ -280,6 +284,7 @@ class AssignmentController extends Controller
             'section_id' => $request->section_id,
             'due_date' => $dueDate,
             'max_score' => $request->max_score ?? $assignment->max_score,
+            'allow_late_submission' => $request->boolean('allow_late_submission'),
             'file_url' => $fileUrl,
         ]);
 
@@ -287,6 +292,8 @@ class AssignmentController extends Controller
         if ($assignment->wasChanged('title')) {
             $assignment->update(['slug' => $assignment->generateSlug()]);
         }
+
+        ActivityLogger::log($course->id, 'updated', $assignment, 'Memperbarui penugasan: ' . $assignment->title);
 
         Cache::forget("assignment_detail_{$assignment->id}");
         Cache::forget("class_detail_{$course->id}");
@@ -301,6 +308,8 @@ class AssignmentController extends Controller
     public function destroy(ClassSubject $course, Assignment $assignment)
     {
         $this->authorize('update', $course);
+
+        ActivityLogger::log($course->id, 'deleted', $assignment, 'Menghapus penugasan: ' . $assignment->title);
 
         $assignment->delete();
 
@@ -471,6 +480,8 @@ class AssignmentController extends Controller
                 'graded_at' => now(),
             ]
         );
+
+        ActivityLogger::log($course->id, 'graded', $submission, 'Menilai tugas ' . $assignment->title . ' untuk ' . ($student->user->full_name ?? 'siswa'));
 
         Cache::forget("assignment_detail_{$assignment->id}");
 

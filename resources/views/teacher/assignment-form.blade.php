@@ -95,6 +95,19 @@
                             </div>
                         </div>
 
+                        {{-- Allow Late Submission --}}
+                        <div class="flex items-start gap-3">
+                            <div class="flex items-center h-6 mt-0.5">
+                                <input type="checkbox" name="allow_late_submission" id="allow_late_submission" value="1"
+                                    {{ old('allow_late_submission', isset($assignment) && $assignment->allow_late_submission ? true : false) ? 'checked' : '' }}
+                                    class="w-4 h-4 rounded border-gray-300 text-[#1a6341] focus:ring-[#1a6341]">
+                            </div>
+                            <label for="allow_late_submission" class="cursor-pointer">
+                                <span class="block text-sm font-semibold text-gray-700">Izinkan pengumpulan setelah batas waktu</span>
+                                <span class="block text-xs text-gray-500 mt-0.5">Siswa masih bisa mengumpulkan tugas setelah melewati deadline, namun akan ditandai sebagai <em>Telat</em>.</span>
+                            </label>
+                        </div>
+
                         {{-- Max Score --}}
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nilai Maksimal</label>

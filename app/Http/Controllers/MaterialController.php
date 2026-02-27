@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Material;
 use App\Models\ClassSubject;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -146,7 +147,7 @@ class MaterialController extends Controller
 
         $maxOrder = $section->materials()->max('order_number') ?? 0;
 
-        Material::create([
+        $material = Material::create([
             'section_id' => $section->id,
             'title' => $request->title,
             'description' => $request->description,
@@ -157,6 +158,8 @@ class MaterialController extends Controller
             'published_at' => $request->action === 'draft' ? null : now(),
             'created_by' => Auth::id(),
         ]);
+
+        ActivityLogger::log($course->id, 'created', $material, 'Menambahkan materi: ' . $material->title);
 
         Cache::forget("class_detail_{$course->id}");
 
@@ -222,6 +225,8 @@ class MaterialController extends Controller
             $material->update(['slug' => $material->generateSlug()]);
         }
 
+        ActivityLogger::log($course->id, 'updated', $material, 'Memperbarui materi: ' . $material->title);
+
         Cache::forget("material_detail_{$material->id}");
         Cache::forget("class_detail_{$course->id}");
 
@@ -235,6 +240,8 @@ class MaterialController extends Controller
     public function destroy(ClassSubject $course, Material $material)
     {
         $this->authorize('update', $course);
+
+        ActivityLogger::log($course->id, 'deleted', $material, 'Menghapus materi: ' . $material->title);
 
         $material->delete();
 
