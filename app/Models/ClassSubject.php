@@ -92,4 +92,9 @@ class ClassSubject extends Model
     {
         return $this->hasMany(ClassSubjectProgress::class, 'class_subject_id');
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(ClassSchedule::class, 'class_subject_id');
+    }
 }

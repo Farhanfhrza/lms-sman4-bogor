@@ -194,7 +194,7 @@ class ClassContentSeeder extends Seeder
                 'quiz_id' => $quiz->id,
                 'question_text' => "Soal {$i}: " . $this->getQuestionText($i),
                 'question_type' => 'multiple_choice',
-                'points' => 20,
+                'score' => 20,
                 'order_number' => $i,
             ]);
 
@@ -205,7 +205,6 @@ class ClassContentSeeder extends Seeder
                     'question_id' => $question->id,
                     'option_text' => "Pilihan " . chr(65 + $j) . ": " . $this->getOptionText($j),
                     'is_correct' => ($j === $correctOption),
-                    'order_number' => $j,
                 ]);
             }
         }

@@ -17,6 +17,9 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
             $table->foreignId('class_id')->constrained('classes')->cascadeOnDelete();
             $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete();
+            
+            $table->text('general_info')->nullable();
+            $table->string('slug')->unique()->nullable();
 
             $table->unique(['teacher_id', 'subject_id', 'class_id', 'academic_year_id'], 'class_subjects_unique');
             $table->timestamps();

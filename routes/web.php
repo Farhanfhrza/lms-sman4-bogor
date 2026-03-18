@@ -9,7 +9,9 @@ use App\Http\Controllers\AcademicEventController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\AdminLogController;
 use App\Http\Controllers\AdminTeacherController;
+use App\Http\Controllers\AdminSubjectController;
 use App\Http\Controllers\AdminStudentController;
+use App\Http\Controllers\AdminScheduleController;
 use App\Http\Controllers\StudentQuizController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
@@ -22,12 +24,14 @@ Route::get('/', function () {
     return view('welcome');
 })->name('login');
 
-// Handle login POST
-Route::post('/', [AuthenticatedSessionController::class, 'store'])->middleware('guest');
+// Handle login POST with rate limiting (max 6 attempts per minute)
+Route::post('/', [AuthenticatedSessionController::class, 'store'])->middleware(['guest', 'throttle:6,1']);
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'check.email'])->name('dashboard');
+use App\Http\Controllers\DashboardController;
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'check.email'])
+    ->name('dashboard');
 
 Route::middleware(['auth', 'check.email'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -99,6 +103,32 @@ Route::middleware(['auth', 'check.email'])->group(function () {
         Route::get('/students/{student}/edit', [AdminStudentController::class, 'edit'])->name('students.edit');
         Route::put('/students/{student}', [AdminStudentController::class, 'update'])->name('students.update');
         Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('students.destroy');
+
+        // Master Data: Academic Years
+        Route::get('/academic-years', [App\Http\Controllers\AdminAcademicYearController::class, 'index'])->name('academic-years.index');
+        Route::post('/academic-years', [App\Http\Controllers\AdminAcademicYearController::class, 'store'])->name('academic-years.store');
+        Route::put('/academic-years/{academicYear}', [App\Http\Controllers\AdminAcademicYearController::class, 'update'])->name('academic-years.update');
+        Route::delete('/academic-years/{academicYear}', [App\Http\Controllers\AdminAcademicYearController::class, 'destroy'])->name('academic-years.destroy');
+        Route::patch('/academic-years/{academicYear}/activate', [App\Http\Controllers\AdminAcademicYearController::class, 'activate'])->name('academic-years.activate');
+
+        // Master Data: Classes
+        Route::get('/classes', [App\Http\Controllers\AdminClassController::class, 'index'])->name('classes.index');
+        Route::post('/classes', [App\Http\Controllers\AdminClassController::class, 'store'])->name('classes.store');
+        Route::get('/classes/{schoolClass}', [App\Http\Controllers\AdminClassController::class, 'show'])->name('classes.show');
+        Route::put('/classes/{schoolClass}', [App\Http\Controllers\AdminClassController::class, 'update'])->name('classes.update');
+        Route::delete('/classes/{schoolClass}', [App\Http\Controllers\AdminClassController::class, 'destroy'])->name('classes.destroy');
+        Route::post('/classes/{schoolClass}/enroll', [App\Http\Controllers\AdminClassController::class, 'enrollStudents'])->name('classes.enroll');
+
+        // Master Data: Subjects
+        Route::resource('subjects', AdminSubjectController::class);
+        Route::post('subjects/{subject}/teachers', [AdminSubjectController::class, 'assignTeacher'])->name('subjects.assign-teacher');
+        Route::delete('subjects/{subject}/teachers/{teacher}', [AdminSubjectController::class, 'removeTeacher'])->name('subjects.remove-teacher');
+
+        // Schedule Management (Matrix Jadwal)
+        Route::get('/schedules', [AdminScheduleController::class, 'index'])->name('schedules.index');
+        Route::post('/schedules', [AdminScheduleController::class, 'store'])->name('schedules.store');
+        Route::get('/schedules/subjects/search', [AdminScheduleController::class, 'searchSubjects'])->name('schedules.search-subjects');
+        Route::get('/schedules/teachers-for-subject', [AdminScheduleController::class, 'teachersForSubject'])->name('schedules.teachers-for-subject');
     });
 
     // --- Teacher Course Management ---
@@ -138,6 +168,7 @@ Route::middleware(['auth', 'check.email'])->group(function () {
             Route::get('/quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('quizzes.edit');
             Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
             Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
+            Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
         });
     });
 });

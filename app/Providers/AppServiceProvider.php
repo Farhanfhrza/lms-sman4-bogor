@@ -22,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS in production
+        if ($this->app->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Register policies
         Gate::policy(ClassSubject::class, ClassSubjectPolicy::class);
         Gate::policy(\App\Models\Material::class, \App\Policies\MaterialPolicy::class);

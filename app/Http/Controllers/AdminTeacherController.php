@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Teacher;
+use App\Models\Subject;
 use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -98,7 +99,10 @@ class AdminTeacherController extends Controller
      */
     public function edit(Teacher $teacher): View
     {
-        $teacher->load('user');
+        $teacher->load('user', 'subjects');
+
+        $subjects = Subject::orderBy('name')->get();
+        $assignedSubjectIds = $teacher->subjects->pluck('id')->toArray();
 
         $breadcrumbs = [
             ['label' => 'Dashboard', 'url' => route('dashboard')],
@@ -106,7 +110,7 @@ class AdminTeacherController extends Controller
             ['label' => 'Edit: ' . ($teacher->user->full_name ?? '')],
         ];
 
-        return view('admin.teachers.edit', compact('teacher', 'breadcrumbs'));
+        return view('admin.teachers.edit', compact('teacher', 'subjects', 'assignedSubjectIds', 'breadcrumbs'));
     }
 
     /**
@@ -142,6 +146,9 @@ class AdminTeacherController extends Controller
                 'nip'            => $request->nip,
                 'specialization' => $request->specialization,
             ]);
+
+            // Sync teacher-subject assignments
+            $teacher->subjects()->sync($request->input('subject_ids', []));
 
             ActivityLogger::log(null, 'updated', $teacher, 'Memperbarui data guru: ' . $request->full_name);
         });

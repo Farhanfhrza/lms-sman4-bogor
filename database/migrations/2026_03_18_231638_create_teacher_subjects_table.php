@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('classes', function (Blueprint $table) {
+        Schema::create('teacher_subjects', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->integer('grade'); // 10, 11, 12
-            $table->string('major')->default('Umum'); // IPA, IPS, Bahasa, dll
-            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+
+            $table->unique(['teacher_id', 'subject_id']);
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('school_classes');
+        Schema::dropIfExists('teacher_subjects');
     }
 };

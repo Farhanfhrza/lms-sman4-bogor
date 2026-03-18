@@ -15,12 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('section_id')->constrained('class_subject_sections')->cascadeOnDelete();
             $table->string('title');
+            $table->string('slug')->unique()->nullable();
             $table->text('description')->nullable();
             $table->string('content_type'); // pdf, video, link, text
+            $table->string('file_url')->nullable();
+            $table->string('link_url')->nullable();
             $table->string('content_url')->nullable();
             $table->integer('order_number')->default(0);
             $table->timestamp('published_at')->nullable();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

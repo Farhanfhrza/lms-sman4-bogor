@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('is_published')->default(false);
             $table->timestamp('start_at')->nullable();
             $table->timestamp('end_at')->nullable();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

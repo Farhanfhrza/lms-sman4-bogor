@@ -60,6 +60,7 @@ class QuizController extends Controller
             'questions.*.correct_option' => 'required|integer|min:0',
             'questions.*.options'        => 'required|array|min:2',
             'questions.*.options.*.text' => 'required|string|max:1000',
+            'questions.*.image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Enforce 2MB limit on server side
         ]);
 
         // Verify section belongs to this course
@@ -215,6 +216,7 @@ class QuizController extends Controller
             'questions.*.correct_option' => 'required|integer|min:0',
             'questions.*.options'        => 'required|array|min:2',
             'questions.*.options.*.text' => 'required|string|max:1000',
+            'questions.*.image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Enforce 2MB limit on server side
         ]);
 
         $section = $course->sections()->findOrFail($request->section_id);
@@ -306,5 +308,93 @@ class QuizController extends Controller
 
         return redirect()->route('manage.courses.show', $course)
             ->with('success', 'Kuis berhasil dihapus.');
+    }
+
+    /**
+     * Show quiz results / grading page (Teacher).
+     */
+    public function results(ClassSubject $course, Quiz $quiz): View
+    {
+        $this->authorize('update', $course);
+
+        $quiz->load(['section.classSubject.subject', 'section.classSubject.schoolClass', 'questions']);
+
+        // Get the class_id from the course
+        $classId = $course->class_id;
+
+        // Get active academic year
+        $activeAcademicYearId = \App\Models\AcademicYear::where('is_active', true)->value('id');
+
+        // Get all students enrolled in this class
+        $students = \App\Models\Student::whereHas('studentClasses', function ($q) use ($classId, $activeAcademicYearId) {
+                $q->where('class_id', $classId);
+                if ($activeAcademicYearId) {
+                    $q->where('academic_year_id', $activeAcademicYearId);
+                }
+            })
+            ->with(['user' => function ($q) {
+                $q->select('id', 'full_name');
+            }])
+            ->orderBy('id')
+            ->get();
+
+        // Fetch all submitted attempts for this quiz (keyed by student_id, only best/latest)
+        $attemptsByStudent = \App\Models\QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('is_submitted', true)
+            ->get()
+            ->groupBy('student_id')
+            ->map(function ($attempts) {
+                // Pick the attempt with the highest score
+                return $attempts->sortByDesc('total_score')->first();
+            });
+
+        $totalQuestions = $quiz->questions->count();
+
+        // Build rows
+        $rows = $students->map(function ($student, $index) use ($quiz, $attemptsByStudent, $course, $totalQuestions) {
+            $attempt = $attemptsByStudent->get($student->id);
+
+            // Determine status
+            if ($attempt) {
+                $keterangan = 'Sudah Mengerjakan';
+                $keteranganColor = 'green';
+            } else {
+                $keterangan = 'Belum Mengerjakan';
+                $keteranganColor = 'red';
+            }
+
+            // Determine score display
+            if (!$attempt) {
+                $nilaiLabel = 'Kosong';
+                $nilaiColor = 'red';
+            } else {
+                $nilaiLabel = (string) round($attempt->total_score, 1);
+                $nilaiColor = 'default';
+            }
+
+            return [
+                'no' => $index + 1,
+                'name' => $student->user->full_name ?? '-',
+                'nisn' => $student->nisn ?? '-',
+                'keterangan' => $keterangan,
+                'keteranganColor' => $keteranganColor,
+                'nilaiLabel' => $nilaiLabel,
+                'nilaiColor' => $nilaiColor,
+                'hasAttempt' => $attempt !== null,
+                'attemptUuid' => $attempt?->uuid,
+                'student_id' => $student->id,
+            ];
+        });
+
+        $course->load(['subject', 'schoolClass']);
+
+        $breadcrumbs = [
+            ['label' => 'Dashboard', 'url' => route('dashboard')],
+            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
+            ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
+            ['label' => $quiz->title ?? 'Kuis'],
+        ];
+
+        return view('teacher.quiz-grading', compact('course', 'quiz', 'rows', 'breadcrumbs', 'totalQuestions'));
     }
 }

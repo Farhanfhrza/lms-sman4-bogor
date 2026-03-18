@@ -7,6 +7,8 @@
 
     {{-- QuillJS CSS --}}
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    {{-- Compressor.js for client-side image compression --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
 
     <div class="py-6">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -569,11 +571,39 @@
                 handleImageUpload(event, qIdx) {
                     const file = event.target.files[0];
                     if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.questions[qIdx].imagePreview = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
+
+                    // Compress the image before showing preview & submitting
+                    new Compressor(file, {
+                        quality: 0.7,
+                        maxWidth: 1200, // Limit max width so it doesn't break layout or memory
+                        success: (compressedResult) => {
+                            // 1. Show Preview
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                this.questions[qIdx].imagePreview = e.target.result;
+                            };
+                            reader.readAsDataURL(compressedResult);
+
+                            // 2. Replace the file inside the actual <input type="file">
+                            const dataTransfer = new DataTransfer();
+                            // Create a new File object from the compressed blob
+                            const compressedFile = new File([compressedResult], file.name, {
+                                type: compressedResult.type,
+                                lastModified: Date.now(),
+                            });
+                            dataTransfer.items.add(compressedFile);
+                            event.target.files = dataTransfer.files;
+                        },
+                        error: (err) => {
+                            console.error('Image compression failed:', err.message);
+                            // Fallback to original
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                this.questions[qIdx].imagePreview = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        },
+                    });
                 },
 
                 removeImage(qIdx) {

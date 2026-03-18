@@ -76,6 +76,7 @@ class DatabaseSeeder extends Seeder
             $classes->push(\App\Models\SchoolClass::factory()->create([
                 'name' => $name,
                 'grade' => 10 + $index,
+                'major' => 'IPA',
                 'academic_year_id' => $academicYear->id,
             ]));
         }

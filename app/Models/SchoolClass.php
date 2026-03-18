@@ -11,7 +11,12 @@ class SchoolClass extends Model
     use HasFactory;
 
     protected $table = 'classes';
-    protected $fillable = ['name', 'grade', 'academic_year_id'];
+    protected $fillable = ['name', 'grade', 'major', 'academic_year_id', 'teacher_id'];
+
+    public function homeroomTeacher()
+    {
+        return $this->belongsTo(Teacher::class, 'teacher_id');
+    }
 
     public function academicYear()
     {

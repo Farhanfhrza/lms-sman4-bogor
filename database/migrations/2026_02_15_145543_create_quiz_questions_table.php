@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('quiz_id')->constrained()->cascadeOnDelete();
             $table->text('question_text');
+            $table->string('image_url')->nullable();
             $table->string('question_type'); // multiple_choice, true_false, short_answer
             $table->integer('score')->default(1);
             $table->integer('order_number')->default(0);

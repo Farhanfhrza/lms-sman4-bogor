@@ -40,16 +40,44 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
             $nisn = trim((string) $nisn);
             $name = trim((string) $name);
 
-            // Skip if NISN already exists
+            // Skip if NISN already exists in students table (Student has no SoftDeletes)
             if (Student::where('nisn', $nisn)->exists()) {
                 $this->skippedCount++;
                 continue;
             }
 
+            // Check if a user with this login_identifier exists (soft-deleted)
+            $existingUser = User::withTrashed()->where('login_identifier', $nisn)->first();
+
             // Generate email from NISN
             $email = $nisn . '@student.sman4bogor.sch.id';
 
-            // Skip if email already exists
+            if ($existingUser) {
+                // Restore and reuse the soft-deleted user
+                DB::transaction(function () use ($existingUser, $name, $nisn, $email) {
+                    $existingUser->restore();
+                    $existingUser->update([
+                        'full_name' => $name,
+                        'email' => $email,
+                        'password' => Hash::make('Siswa' . $nisn),
+                    ]);
+
+                    if (!$existingUser->hasRole('student')) {
+                        $existingUser->assignRole('student');
+                    }
+
+                    Student::create([
+                        'user_id'         => $existingUser->id,
+                        'nisn'            => $nisn,
+                        'enrollment_year' => $this->enrollmentYear,
+                    ]);
+                });
+
+                $this->importedCount++;
+                continue;
+            }
+
+            // Skip if email already exists (active user)
             if (User::where('email', $email)->exists()) {
                 $this->skippedCount++;
                 continue;

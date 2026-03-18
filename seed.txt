@@ -1,0 +1,35 @@
+
+   INFO  Seeding database.  
+
+  Database\Seeders\RoleAndPermissionSeeder  RUNNING  
+  Database\Seeders\RoleAndPermissionSeeder  93 ms DONE  
+
+  Database\Seeders\ClassContentSeeder  RUNNING  
+Seeding class content...
+Creating content for Fisika - X IPA 1
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42703]: Undefined column: 7 ERROR:  column "order_number" of relation "quiz_options" does not exist
+LINE 1: ...ons" ("question_id", "option_text", "is_correct", "order_num...
+                                                             ^ (Connection: pgsql, SQL: insert into "quiz_options" ("question_id", "option_text", "is_correct", "order_number", "updated_at", "created_at") values (2, Pilihan A: Jawaban yang paling tepat berdasarkan teori, 0, 0, 2026-03-18 22:47:36, 2026-03-18 22:47:36) returning "id")
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:412
+      PDOException::("SQLSTATE[42703]: Undefined column: 7 ERROR:  column "order_number" of relation "quiz_options" does not exist
+LINE 1: ...ons" ("question_id", "option_text", "is_correct", "order_num...
+                                                             ^")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:412
+      PDOStatement::execute()
+

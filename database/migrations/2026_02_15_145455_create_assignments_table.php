@@ -15,11 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('section_id')->constrained('class_subject_sections')->cascadeOnDelete();
             $table->string('title');
+            $table->string('slug')->unique()->nullable();
             $table->text('description')->nullable();
+            $table->string('file_url')->nullable();
+            $table->string('link_url')->nullable();
             $table->timestamp('due_date')->nullable();
             $table->integer('max_score')->default(100);
             $table->integer('order_number')->default(0);
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+            $table->boolean('allow_late_submission')->default(true);
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

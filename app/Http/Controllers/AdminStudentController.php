@@ -92,14 +92,32 @@ class AdminStudentController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            $user = User::create([
-                'full_name'        => $request->full_name,
-                'login_identifier' => $request->nisn,
-                'email'            => $request->email,
-                'password'         => Hash::make($request->password),
-            ]);
+            // Check if a soft-deleted user with same login_identifier exists
+            $existingUser = User::withTrashed()->where('login_identifier', $request->nisn)->first();
 
-            $user->assignRole('student');
+            if ($existingUser) {
+                // Restore and update the soft-deleted user
+                $existingUser->restore();
+                $existingUser->update([
+                    'full_name' => $request->full_name,
+                    'email'     => $request->email,
+                    'password'  => Hash::make($request->password),
+                ]);
+                $user = $existingUser;
+
+                if (!$user->hasRole('student')) {
+                    $user->assignRole('student');
+                }
+            } else {
+                $user = User::create([
+                    'full_name'        => $request->full_name,
+                    'login_identifier' => $request->nisn,
+                    'email'            => $request->email,
+                    'password'         => Hash::make($request->password),
+                ]);
+
+                $user->assignRole('student');
+            }
 
             $student = Student::create([
                 'user_id'         => $user->id,

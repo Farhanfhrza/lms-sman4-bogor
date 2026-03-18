@@ -62,6 +62,28 @@
                     <p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ingin mengubah password.</p>
                 </div>
 
+                {{-- Subject Assignment --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Mata Pelajaran Yang Diajar
+                        <span class="text-xs text-gray-400 font-normal ml-1">(centang semua mapel yang bisa diajar oleh guru ini)</span>
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 border border-gray-200 rounded-lg p-3 max-h-52 overflow-y-auto bg-gray-50">
+                        @foreach($subjects as $subject)
+                        <label class="flex items-center space-x-2 cursor-pointer p-1.5 rounded hover:bg-white transition-colors">
+                            <input type="checkbox" name="subject_ids[]" value="{{ $subject->id }}"
+                                   {{ in_array($subject->id, $assignedSubjectIds) ? 'checked' : '' }}
+                                   class="rounded border-gray-300 text-[#1a6341] focus:ring-[#1a6341]">
+                            <span class="text-sm text-gray-700">{{ $subject->name }}</span>
+                            @if($subject->code)
+                            <span class="text-xs text-gray-400">({{ $subject->code }})</span>
+                            @endif
+                        </label>
+                        @endforeach
+                    </div>
+                    @error('subject_ids') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <div class="flex items-center justify-end pt-4 border-t border-gray-200">
                     <a href="{{ route('admin.teachers.index') }}" class="text-gray-500 hover:text-gray-700 mr-4 text-sm">Batal</a>
                     <button type="submit" class="bg-[#1a6341] hover:bg-[#238054] text-white px-6 py-2.5 rounded-lg shadow-sm transition-colors text-sm font-medium">

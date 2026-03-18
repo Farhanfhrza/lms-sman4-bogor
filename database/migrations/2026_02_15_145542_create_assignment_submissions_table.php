@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('assignment_id')->constrained()->cascadeOnDelete();
             $table->foreignId('student_id')->constrained()->cascadeOnDelete();
-            $table->string('submission_url');
+            $table->string('submission_url')->nullable();
+            $table->string('file_url')->nullable();
+            $table->string('link_url')->nullable();
+            $table->text('submission_text')->nullable();
+            $table->string('status')->default('submitted');
             $table->timestamp('submitted_at')->useCurrent();
             $table->integer('score')->nullable();
             $table->text('feedback')->nullable();
