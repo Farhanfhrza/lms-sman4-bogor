@@ -32,6 +32,11 @@ class ClassSubject extends Model
                 $classSubject->slug = $classSubject->generateSlug();
             }
         });
+
+        static::deleting(function ($classSubject) {
+            // Cascade delete BAB agar file materi, tugas, dan kuis ikut dihapus
+            $classSubject->sections->each->delete();
+        });
     }
 
     /**

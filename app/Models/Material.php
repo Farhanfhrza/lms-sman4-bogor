@@ -31,6 +31,21 @@ class Material extends Model
                 $material->slug = $material->generateSlug();
             }
         });
+
+        static::updating(function ($material) {
+            if ($material->isDirty('file_url')) {
+                $oldFile = $material->getOriginal('file_url');
+                if ($oldFile && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldFile)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($oldFile);
+                }
+            }
+        });
+
+        static::deleted(function ($material) {
+            if ($material->file_url && \Illuminate\Support\Facades\Storage::disk('public')->exists($material->file_url)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($material->file_url);
+            }
+        });
     }
 
     /**

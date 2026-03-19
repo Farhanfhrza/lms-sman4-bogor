@@ -23,6 +23,16 @@ class Quiz extends Model
         'end_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($quiz) {
+            // Hapus pertanyaan agar file gambar pertanyaan ikut dihapus oleh hooks QuizQuestion
+            $quiz->questions->each->delete();
+        });
+    }
+
     public function section()
     {
         return $this->belongsTo(ClassSubjectSection::class, 'section_id');

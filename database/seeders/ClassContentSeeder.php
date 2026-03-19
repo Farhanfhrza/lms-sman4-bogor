@@ -34,14 +34,9 @@ class ClassContentSeeder extends Seeder
         foreach ($classSubjects as $classSubject) {
             $this->command->info("Creating content for {$classSubject->subject->name} - {$classSubject->schoolClass->name}");
 
-            // Update general_info and generate slug
+            // Update general_info
             $classSubject->update([
                 'general_info' => $this->getInformasiUmumContent($classSubject->subject->name),
-                'slug' => \Illuminate\Support\Str::slug(
-                    $classSubject->subject->name . ' ' . 
-                    $classSubject->schoolClass->name . ' ' . 
-                    $classSubject->id
-                ),
             ]);
 
             // Create 3 sections (Bab) per class subject

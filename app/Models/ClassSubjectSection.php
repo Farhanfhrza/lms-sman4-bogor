@@ -16,6 +16,18 @@ class ClassSubjectSection extends Model
         'is_published' => 'boolean',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($section) {
+            // Hapus isi BAB secara manual via Eloquent agar trigger 'deleted' memakan file-file siswanya
+            $section->materials->each->delete();
+            $section->assignments->each->delete();
+            $section->quizzes->each->delete();
+        });
+    }
+
     public function classSubject()
     {
         return $this->belongsTo(ClassSubject::class);

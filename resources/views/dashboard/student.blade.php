@@ -92,12 +92,12 @@
                         ];
                     })->values()->all();
                 @endphp
-                <div x-data="{
-                        filterTime: 'all',
+                <div x-data='{
+                        filterTime: "all",
                         assignments: @json($mappedAssignments),
                         
                         get filteredAssignments() {
-                            if (this.filterTime === 'all') return this.assignments;
+                            if (this.filterTime === "all") return this.assignments;
                             
                             const now = new Date();
                             const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -110,13 +110,13 @@
                                 const diffTime = due.getTime() - todayStart.getTime();
                                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                                 
-                                if (this.filterTime === 'today') return diffDays >= 0 && diffDays <= 1;
-                                if (this.filterTime === '7days') return diffDays >= 0 && diffDays <= 7;
-                                if (this.filterTime === '30days') return diffDays >= 0 && diffDays <= 30;
+                                if (this.filterTime === "today") return diffDays >= 0 && diffDays <= 1;
+                                if (this.filterTime === "7days") return diffDays >= 0 && diffDays <= 7;
+                                if (this.filterTime === "30days") return diffDays >= 0 && diffDays <= 30;
                                 return true;
                             });
                         }
-                    }" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-6">
+                    }' class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-6">
                     <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center">
                         <h3 class="font-bold text-lg text-gray-800 flex items-center mb-3 sm:mb-0">
                             <svg class="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>

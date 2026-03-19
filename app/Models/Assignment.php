@@ -32,6 +32,28 @@ class Assignment extends Model
                 $assignment->slug = $assignment->generateSlug();
             }
         });
+
+        static::updating(function ($assignment) {
+            if ($assignment->isDirty('file_url')) {
+                $oldFile = $assignment->getOriginal('file_url');
+                if ($oldFile && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldFile)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($oldFile);
+                }
+            }
+        });
+
+        static::deleting(function ($assignment) {
+            // Hapus setiap submisi secara manual via Eloquent agar trigger 'deleted' memakan file-file siswanya
+            $assignment->submissions->each(function($submission) {
+                $submission->delete();
+            });
+        });
+
+        static::deleted(function ($assignment) {
+            if ($assignment->file_url && \Illuminate\Support\Facades\Storage::disk('public')->exists($assignment->file_url)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($assignment->file_url);
+            }
+        });
     }
 
     /**

@@ -31,7 +31,39 @@
             @endif
 
             {{-- Informasi Umum Section --}}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8" x-data="{ editingInfo: false }">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8" 
+                 x-data="{ 
+                     editingInfo: false,
+                     quill: null,
+                     initQuill() {
+                         if(this.quill) return;
+                         this.quill = new Quill(document.getElementById('editor-container'), {
+                             theme: 'snow',
+                             modules: {
+                                 toolbar: [
+                                     ['bold', 'italic', 'underline', 'strike'],
+                                     ['blockquote', 'code-block'],
+                                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                     [{ 'script': 'sub'}, { 'script': 'super' }],
+                                     [{ 'indent': '-1'}, { 'indent': '+1' }],
+                                     [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                     [{ 'color': [] }, { 'background': [] }],
+                                     [{ 'align': [] }],
+                                     ['link', 'video'],
+                                     ['clean']
+                                 ]
+                             }
+                         });
+                         const input = document.getElementById('general_info_input');
+                         if(input && input.value) {
+                             this.quill.root.innerHTML = input.value;
+                         }
+                         this.quill.on('text-change', () => {
+                             input.value = this.quill.root.innerHTML;
+                         });
+                     }
+                 }"
+                 x-init="$watch('editingInfo', val => { if(val) $nextTick(() => initQuill()) })">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-gray-800">Informasi Umum</h2>
                     <button @click="editingInfo = !editingInfo" class="text-sm text-[#1a6341] hover:text-[#145232] font-medium flex items-center gap-1">
@@ -43,7 +75,7 @@
                 {{-- View Mode --}}
                 <div x-show="!editingInfo">
                     @if($course->general_info)
-                        <div class="prose prose-sm max-w-none text-gray-700">{!! nl2br(e($course->general_info)) !!}</div>
+                        <div class="prose prose-sm max-w-none text-gray-700">{!! $course->general_info !!}</div>
                     @else
                         <p class="text-gray-400 italic text-sm">Belum ada informasi umum. Klik Edit untuk menambahkan.</p>
                     @endif
@@ -51,10 +83,11 @@
 
                 {{-- Edit Mode --}}
                 <div x-show="editingInfo" x-cloak>
-                    <form action="{{ route('manage.courses.update-info', $course) }}" method="POST">
+                    <form action="{{ route('manage.courses.update-info', $course) }}" method="POST" id="formGeneralInfo">
                         @csrf
                         @method('PUT')
-                        <textarea name="general_info" rows="8" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#1a6341] focus:border-transparent resize-y" placeholder="Masukkan deskripsi, capaian pembelajaran, pokok bahasan, dan pustaka...">{{ old('general_info', $course->general_info) }}</textarea>
+                        <input type="hidden" name="general_info" id="general_info_input" value="{{ old('general_info', $course->general_info) }}">
+                        <div id="editor-container" class="border border-gray-300 rounded-lg min-h-[200px] bg-white"></div>
                         <div class="flex justify-end mt-3 gap-2">
                             <button type="button" @click="editingInfo = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">Batal</button>
                             <button type="submit" class="px-4 py-2 text-sm text-white bg-[#1a6341] hover:bg-[#145232] rounded-lg shadow-sm">Simpan</button>
@@ -120,27 +153,21 @@
                             </button>
 
                             {{-- Delete Section --}}
-                            <button @click="showDeleteConfirm = true" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Hapus BAB">
+                            <button @click="$dispatch('open-confirm-modal-del-section-{{ $section->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Hapus BAB">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
                         </div>
                     </div>
 
-                    {{-- Delete Confirmation Modal --}}
-                    <div x-show="showDeleteConfirm" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" @click.self="showDeleteConfirm = false">
-                        <div class="bg-white rounded-xl p-6 max-w-sm mx-4 shadow-2xl">
-                            <h4 class="text-lg font-bold text-gray-800 mb-2">Hapus BAB?</h4>
-                            <p class="text-sm text-gray-600 mb-4">Semua materi dan penugasan di dalam BAB <strong>"{{ $section->title }}"</strong> akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.</p>
-                            <div class="flex justify-end gap-2">
-                                <button @click="showDeleteConfirm = false" class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
-                                <form action="{{ route('manage.courses.sections.destroy', [$course, $section]) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="px-4 py-2 text-sm text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-sm">Hapus</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    {{-- Delete Section --}}
+                    <x-confirm-delete-modal
+                        :id="'del-section-'.$section->id"
+                        title="Hapus BAB?"
+                        :description="'Semua materi, penugasan, dan kuis di dalam BAB &quot;'.$section->title.'&quot; akan ikut terhapus secara PERMANEN. Tindakan ini tidak dapat dibatalkan.'"
+                        :confirmText="$section->title"
+                        :action="route('manage.courses.sections.destroy', [$course, $section])"
+                        buttonLabel="Ya, Hapus BAB"
+                    />
 
                     {{-- Content Items --}}
                     <div class="space-y-3">
@@ -168,13 +195,17 @@
                                     <a href="{{ route('manage.courses.materials.edit', [$course, $material]) }}" class="p-1.5 text-gray-400 hover:text-[#1a6341] rounded-lg hover:bg-white" title="Edit">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     </a>
-                                    <form action="{{ route('manage.courses.materials.destroy', [$course, $material]) }}" method="POST" onsubmit="return confirm('Hapus materi ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Hapus">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </form>
+                                    <button @click="$dispatch('open-confirm-modal-del-mat-{{ $material->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                    <x-confirm-delete-modal
+                                        :id="'del-mat-'.$material->id"
+                                        title="Hapus Materi?"
+                                        :description="'File materi &quot;'.$material->title.'&quot; akan terhapus dari server secara permanen.'"
+                                        :confirmText="$material->title"
+                                        :action="route('manage.courses.materials.destroy', [$course, $material])"
+                                        buttonLabel="Ya, Hapus Materi"
+                                    />
                                 </div>
                             </div>
 
@@ -222,13 +253,17 @@
                                     <a href="{{ route('manage.courses.assignments.edit', [$course, $assignment]) }}" class="p-1.5 text-gray-400 hover:text-[#1a6341] rounded-lg hover:bg-white" title="Edit">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     </a>
-                                    <form action="{{ route('manage.courses.assignments.destroy', [$course, $assignment]) }}" method="POST" onsubmit="return confirm('Hapus penugasan ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Hapus">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </form>
+                                    <button @click="$dispatch('open-confirm-modal-del-asgn-{{ $assignment->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                    <x-confirm-delete-modal
+                                        :id="'del-asgn-'.$assignment->id"
+                                        title="Hapus Penugasan?"
+                                        :description="'Semua pengumpulan file siswa untuk tugas &quot;'.$assignment->title.'&quot; akan ikut terhapus dari server secara permanen.'"
+                                        :confirmText="$assignment->title"
+                                        :action="route('manage.courses.assignments.destroy', [$course, $assignment])"
+                                        buttonLabel="Ya, Hapus Penugasan"
+                                    />
                                 </div>
                             </div>
                         @endforeach
@@ -254,13 +289,17 @@
                                     <a href="{{ route('manage.courses.quizzes.edit', [$course, $quiz]) }}" class="p-1.5 text-gray-400 hover:text-[#1a6341] rounded-lg hover:bg-white" title="Edit">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     </a>
-                                    <form action="{{ route('manage.courses.quizzes.destroy', [$course, $quiz]) }}" method="POST" onsubmit="return confirm('Hapus kuis ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Hapus">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </form>
+                                    <button @click="$dispatch('open-confirm-modal-del-quiz-{{ $quiz->id }}')" class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50" title="Hapus">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                    <x-confirm-delete-modal
+                                        :id="'del-quiz-'.$quiz->id"
+                                        title="Hapus Kuis?"
+                                        :description="'Semua jawaban, percobaan, dan gambar soal kuis &quot;'.$quiz->title.'&quot; akan terhapus permanen.'"
+                                        :confirmText="$quiz->title"
+                                        :action="route('manage.courses.quizzes.destroy', [$course, $quiz])"
+                                        buttonLabel="Ya, Hapus Kuis"
+                                    />
                                 </div>
                             </div>
                         @endforeach
@@ -303,4 +342,18 @@
 
         </div>
     </div>
+    @push('styles')
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <style>
+        #editor-container .ql-editor {
+            min-height: 200px;
+            font-family: inherit;
+            font-size: 0.875rem;
+        }
+    </style>
+    @endpush
+
+    @push('scripts')
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    @endpush
 </x-app-layout>

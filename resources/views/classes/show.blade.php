@@ -37,7 +37,7 @@
                         <h2 class="text-2xl font-bold text-gray-900 mb-4">Informasi Umum</h2>
                         
                         <div class="prose prose-sm max-w-none text-gray-700">
-                            {!! nl2br(e($classSubject->general_info)) !!}
+                            {!! $classSubject->general_info !!}
                         </div>
 
                         <!-- Pokok Bahasan (list all BAB titles) -->

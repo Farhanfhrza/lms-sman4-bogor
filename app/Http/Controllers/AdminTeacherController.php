@@ -66,6 +66,7 @@ class AdminTeacherController extends Controller
             'full_name'      => 'required|string|max:255',
             'login_id'       => 'required|string|max:50|unique:users,login_identifier',
             'email'          => 'nullable|email|max:255|unique:users,email',
+            'gender'         => 'required|in:L,P',
             'nip'            => 'nullable|string|max:30|unique:teachers,nip',
             'specialization' => 'nullable|string|max:255',
             'password'       => 'required|string|min:8',
@@ -76,6 +77,7 @@ class AdminTeacherController extends Controller
                 'full_name'        => $request->full_name,
                 'login_identifier' => $request->login_id,
                 'email'            => $request->email,
+                'gender'           => $request->gender,
                 'password'         => Hash::make($request->password),
             ]);
 
@@ -124,6 +126,7 @@ class AdminTeacherController extends Controller
             'full_name'      => 'required|string|max:255',
             'login_id'       => 'required|string|max:50|unique:users,login_identifier,' . $teacher->user_id,
             'email'          => 'nullable|email|max:255|unique:users,email,' . $teacher->user_id,
+            'gender'         => 'required|in:L,P',
             'nip'            => 'nullable|string|max:30|unique:teachers,nip,' . $teacher->id,
             'specialization' => 'nullable|string|max:255',
             'password'       => 'nullable|string|min:8',
@@ -134,6 +137,7 @@ class AdminTeacherController extends Controller
                 'full_name'        => $request->full_name,
                 'login_identifier' => $request->login_id,
                 'email'            => $request->email,
+                'gender'           => $request->gender,
             ];
 
             if ($request->filled('password')) {

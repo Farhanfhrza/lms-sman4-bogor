@@ -24,12 +24,24 @@
                     @error('full_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}"
-                           class="w-full border-gray-300 focus:border-[#1a6341] focus:ring-[#1a6341] rounded-md shadow-sm">
-                    @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    <p class="text-xs text-gray-400 mt-1">Opsional. Jika kosong, akan otomatis di-generate dari NISN.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="email" name="email" value="{{ old('email') }}"
+                               class="w-full border-gray-300 focus:border-[#1a6341] focus:ring-[#1a6341] rounded-md shadow-sm">
+                        @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        <p class="text-xs text-gray-400 mt-1">Opsional. Otomatis dari NISN jika kosong.</p>
+                    </div>
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
+                        <select id="gender" name="gender" required
+                                class="w-full border-gray-300 focus:border-[#1a6341] focus:ring-[#1a6341] rounded-md shadow-sm">
+                            <option value="">Pilih Jenis Kelamin...</option>
+                            <option value="L" {{ old('gender') == 'L' ? 'selected' : '' }}>Laki-laki (L)</option>
+                            <option value="P" {{ old('gender') == 'P' ? 'selected' : '' }}>Perempuan (P)</option>
+                        </select>
+                        @error('gender') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

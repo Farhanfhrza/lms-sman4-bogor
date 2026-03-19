@@ -21,6 +21,7 @@
             /* Reserve space for fixed header and footer */
             body { padding-top: 64px; padding-bottom: 56px; }
         </style>
+        @stack('styles')
     </head>
     <body class="font-sans antialiased bg-gray-100 text-gray-900" x-data="{ mobileMenuOpen: false }">
         

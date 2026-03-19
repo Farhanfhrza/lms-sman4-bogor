@@ -86,6 +86,7 @@ class AdminStudentController extends Controller
         $request->validate([
             'full_name'       => 'required|string|max:255',
             'email'           => 'nullable|email|max:255|unique:users,email',
+            'gender'          => 'required|in:L,P',
             'nisn'            => 'required|string|max:20|unique:students,nisn',
             'enrollment_year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
             'password'        => 'required|string|min:8',
@@ -101,6 +102,7 @@ class AdminStudentController extends Controller
                 $existingUser->update([
                     'full_name' => $request->full_name,
                     'email'     => $request->email,
+                    'gender'    => $request->gender,
                     'password'  => Hash::make($request->password),
                 ]);
                 $user = $existingUser;
@@ -113,6 +115,7 @@ class AdminStudentController extends Controller
                     'full_name'        => $request->full_name,
                     'login_identifier' => $request->nisn,
                     'email'            => $request->email,
+                    'gender'           => $request->gender,
                     'password'         => Hash::make($request->password),
                 ]);
 

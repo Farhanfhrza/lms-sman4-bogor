@@ -81,7 +81,7 @@
         {{-- Tab Content: Daftar Siswa --}}
         <div x-show="currentTab === 'overview'" class="bg-white shadow-sm rounded-lg border border-gray-200 p-6" style="display: none;" x-cloak>
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-800">Siswa yang Terdaftar</h3>
+                <h3 class="text-lg font-bold text-gray-800">Siswa yang Terdaftar di Kelas {{ $schoolClass->name }}</h3>
                 <button @click="showEnrollModal = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                     Setup Siswa
@@ -119,7 +119,7 @@
         {{-- Tab Content: Jadwal Pelajaran --}}
         <div x-show="currentTab === 'schedule'" class="bg-white shadow-sm rounded-lg border border-gray-200 p-6" style="display: none;" x-cloak>
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-800">Jadwal Mata Pelajaran</h3>
+                <h3 class="text-lg font-bold text-gray-800">Jadwal Mata Pelajaran - Kelas {{ $schoolClass->name }}</h3>
                 <a href="{{ route('admin.schedules.index') }}" class="text-[#1a6341] hover:text-[#238054] text-sm font-medium flex items-center">
                     Buka Pengaturan Jadwal (Matrix)
                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -152,8 +152,11 @@
                                 }
                             }
                             $sortedSchedules = $allSchedules->sortBy(function($s) {
-                                $dayOrder = ['Monday'=>1, 'Tuesday'=>2, 'Wednesday'=>3, 'Thursday'=>4, 'Friday'=>5, 'Saturday'=>6, 'Sunday'=>7];
-                                return $dayOrder[$s->day_of_week] . $s->start_time;
+                                $dayOrder = [
+                                    'Senin'=>1, 'Selasa'=>2, 'Rabu'=>3, 'Kamis'=>4, 'Jumat'=>5, 'Sabtu'=>6, 'Minggu'=>7,
+                                    'Monday'=>1, 'Tuesday'=>2, 'Wednesday'=>3, 'Thursday'=>4, 'Friday'=>5, 'Saturday'=>6, 'Sunday'=>7
+                                ];
+                                return ($dayOrder[$s->day_of_week] ?? 9) . $s->start_time;
                             });
                         @endphp
 

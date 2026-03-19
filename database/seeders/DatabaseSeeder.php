@@ -42,6 +42,7 @@ class DatabaseSeeder extends Seeder
                 'login_identifier' => $nip,
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
                 'is_active' => true,
+                'gender' => fake()->randomElement(['L', 'P']),
             ]);
             $user->assignRole('teacher');
             \App\Models\Teacher::factory()->create([
@@ -59,6 +60,7 @@ class DatabaseSeeder extends Seeder
                 'login_identifier' => $nisn,
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
                 'is_active' => true,
+                'gender' => fake()->randomElement(['L', 'P']),
             ]);
             $user->assignRole('student');
             \App\Models\Student::factory()->create([
@@ -105,18 +107,32 @@ class DatabaseSeeder extends Seeder
             ]));
         }
 
-        // 9. Class Subjects (without inline content)
+        // 9. Class Subjects
         foreach ($classes as $class) {
             foreach ($subjects as $index => $subject) {
                 // Assign a random teacher to this subject in this class
                 $teacherUser = $teachers->random();
+
+                // Ensure teacher is assigned to this master subject
+                if (!$subject->teachers->contains($teacherUser->teacher->id)) {
+                    $subject->teachers()->attach($teacherUser->teacher->id);
+                }
                 
-                \App\Models\ClassSubject::create([
+                $cs = \App\Models\ClassSubject::create([
                     'subject_id' => $subject->id,
                     'class_id' => $class->id,
                     'teacher_id' => $teacherUser->teacher->id,
                     'academic_year_id' => $academicYear->id,
                     // general_info will be added by ClassContentSeeder
+                ]);
+
+                // Create a schedule for this
+                \App\Models\ClassSchedule::create([
+                    'class_subject_id' => $cs->id,
+                    'day_of_week' => collect(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'])->random(),
+                    'start_time' => '07:30',
+                    'end_time' => '09:00',
+                    'room' => 'Lab ' . rand(1, 4),
                 ]);
             }
         }

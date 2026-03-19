@@ -57,6 +57,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'full_name' => 'Administrator',
                 'login_identifier' => 'admin',
                 'email' => 'admin@sman4bogor.sch.id',
+                'gender' => 'L',
                 'password' => Hash::make('password'),
                 'is_active' => true,
             ]);
@@ -68,6 +69,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'full_name' => 'Guru Teladan',
                 'login_identifier' => 'guru',
                 'email' => 'guru@sman4bogor.sch.id',
+                'gender' => 'P',
                 'password' => Hash::make('password'),
                 'is_active' => true,
             ]);
@@ -83,6 +85,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'full_name' => 'Siswa Berprestasi',
                 'login_identifier' => 'siswa',
                 'email' => 'siswa@sman4bogor.sch.id',
+                'gender' => 'L',
                 'password' => Hash::make('password'),
                 'is_active' => true,
             ]);
@@ -100,6 +103,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'full_name' => 'Petugas Piket',
                 'login_identifier' => 'piket',
                 'email' => 'piket@sman4bogor.sch.id',
+                'gender' => 'L',
                 'password' => Hash::make('password'),
                 'is_active' => true,
             ]);
@@ -111,6 +115,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'full_name' => 'Wali Kelas X-1',
                 'login_identifier' => 'walikelas',
                 'email' => 'walikelas@sman4bogor.sch.id',
+                'gender' => 'P',
                 'password' => Hash::make('password'),
                 'is_active' => true,
             ]);
