@@ -66,7 +66,6 @@ class AssignmentController extends Controller
         // Breadcrumb data
         $classSubject = $assignment->section->classSubject;
         $breadcrumbs = [
-            ['label' => 'Courses', 'url' => route('courses.index')],
             ['label' => $classSubject->subject->name ?? 'Course', 'url' => route('courses.show', $classSubject)],
             ['label' => $assignment->section->title ?? 'Section'],
             ['label' => $assignment->title ?? 'Assignment'],
@@ -149,8 +148,6 @@ class AssignmentController extends Controller
         $course->load(['subject', 'schoolClass', 'sections' => fn($q) => $q->orderBy('order_number')]);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => 'Tambah Penugasan'],
         ];
@@ -232,8 +229,6 @@ class AssignmentController extends Controller
         $course->load(['subject', 'schoolClass', 'sections' => fn($q) => $q->orderBy('order_number')]);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => 'Edit Penugasan'],
         ];
@@ -414,8 +409,6 @@ class AssignmentController extends Controller
         $course->load(['subject', 'schoolClass']);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => $assignment->title ?? 'Penugasan'],
         ];
@@ -445,8 +438,6 @@ class AssignmentController extends Controller
         $course->load(['subject', 'schoolClass']);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => $assignment->title ?? 'Penugasan', 'url' => route('manage.courses.assignments.submissions', [$course, $assignment])],
             ['label' => $student->user->full_name ?? 'Siswa'],

@@ -11,7 +11,7 @@
             <div class="relative rounded-lg overflow-hidden mb-6 shadow-lg" style="height: 250px;">
                 <!-- Background Image dengan Overlay -->
                 <div class="absolute inset-0 bg-gradient-to-r from-[#1a6341]/95 to-[#2a8d5f]/95">
-                    <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1200&h=400&fit=crop" 
+                    <img src="{{ $course->subject->cover_image_url }}" 
                          alt="Background" 
                          class="w-full h-full object-cover mix-blend-overlay opacity-40">
                 </div>
@@ -218,8 +218,8 @@
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h3 class="font-bold text-gray-900 mb-4">Informasi Pengajar</h3>
                         <div class="flex items-center mb-4">
-                            <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 mr-4">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($course->teacher->user->full_name ?? 'Teacher') }}&background=1a6341&color=fff&size=128" 
+                            <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 mr-4 shadow-sm">
+                                <img src="{{ $course->teacher->user->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($course->teacher->user->full_name ?? 'Teacher') . '&background=1a6341&color=fff&size=128' }}" 
                                      alt="Teacher" 
                                      class="w-full h-full object-cover">
                             </div>
@@ -229,6 +229,24 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Shortcut Absensi -->
+                    @role('student')
+                    <div class="bg-gradient-to-br from-[#1a6341] to-[#238054] rounded-lg shadow-md p-6 text-white relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-white opacity-10 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div class="relative z-10">
+                            <h3 class="font-bold text-lg mb-2 flex items-center">
+                                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Kehadiran Anda
+                            </h3>
+                            <p class="text-green-100 text-sm mb-4">Pastikan Anda selalu mengisi daftar hadir pada setiap pertemuan.</p>
+                            <a href="{{ route('student.attendances.show', $course->slug) }}" class="inline-flex w-full items-center justify-center px-4 py-2.5 bg-white text-[#1a6341] font-bold rounded-md hover:bg-gray-50 transition-colors shadow-sm">
+                                Cek & Isi Absensi
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                    @endrole
 
                     <!-- Progress (for students) -->
                     @role('student')
@@ -256,8 +274,8 @@
                         <div class="space-y-3 max-h-96 overflow-y-auto">
                             @forelse($classmates->take(10) as $classmate)
                                 <div class="flex items-center">
-                                    <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 mr-3">
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($classmate->full_name ?? $classmate->name) }}&background=random&size=40" 
+                                    <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 mr-3 border border-gray-100 shadow-sm">
+                                        <img src="{{ $classmate->profile_photo_url }}" 
                                              alt="{{ $classmate->full_name ?? $classmate->name }}" 
                                              class="w-full h-full object-cover">
                                     </div>

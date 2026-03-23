@@ -51,7 +51,6 @@ class AdminClassController extends Controller
         $teachers = Teacher::with('user')->get()->sortBy(fn($t) => $t->user->full_name ?? '');
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Data Kelas'],
         ];
 
@@ -152,7 +151,6 @@ class AdminClassController extends Controller
             ->sortBy(fn($s) => $s->user->full_name ?? '');
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Data Kelas', 'url' => route('admin.classes.index')],
             ['label' => 'Detail ' . $schoolClass->name],
         ];

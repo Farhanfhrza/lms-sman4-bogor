@@ -78,7 +78,12 @@
                                     <span class="px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-800 text-xs font-bold rounded">{{ $subject->code }}</span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="font-bold text-gray-900">{{ $subject->name }}</div>
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0 mr-3 rounded-md overflow-hidden border border-gray-200 shadow-sm">
+                                            <img class="h-10 w-10 object-cover" src="{{ $subject->cover_image_url }}" alt="">
+                                        </div>
+                                        <div class="font-bold text-gray-900">{{ $subject->name }}</div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm border border-emerald-200 bg-emerald-50 text-emerald-700 px-3 py-1 rounded inline-flex items-center font-semibold">
@@ -145,8 +150,15 @@
                             @forelse($activeClassSubjects as $cs)
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-bold text-gray-900">{{ $cs->subject->name ?? 'Terhapus' }}</div>
-                                    <div class="text-xs text-gray-500 mt-1"><span class="bg-gray-100 border border-gray-200 px-1 py-0.5 rounded">{{ $cs->subject->code ?? '-' }}</span></div>
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0 mr-3 rounded-md overflow-hidden border border-gray-200 shadow-sm">
+                                            <img class="h-10 w-10 object-cover" src="{{ optional($cs->subject)->cover_image_url }}" alt="">
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-gray-900">{{ $cs->subject->name ?? 'Terhapus' }}</div>
+                                            <div class="text-xs text-gray-500 mt-1"><span class="bg-gray-100 border border-gray-200 px-1 py-0.5 rounded">{{ $cs->subject->code ?? '-' }}</span></div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-bold text-indigo-700">{{ $cs->schoolClass->name ?? 'Unknown' }}</div>
@@ -154,8 +166,8 @@
                                 <td class="px-6 py-4">
                                     @if($cs->teacher)
                                         <div class="flex items-center">
-                                            <div class="h-6 w-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs mr-2">
-                                                {{ substr($cs->teacher->user->full_name ?? '?', 0, 1) }}
+                                            <div class="h-6 w-6 rounded-full overflow-hidden mr-2 border border-gray-200 shadow-sm">
+                                                <img src="{{ $cs->teacher->user->profile_photo_url }}" alt="{{ $cs->teacher->user->full_name }}" class="w-full h-full object-cover">
                                             </div>
                                             <span class="text-sm font-medium text-gray-800">{{ $cs->teacher->user->full_name ?? 'Guru Terhapus' }}</span>
                                         </div>
@@ -192,7 +204,7 @@
                      x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
                      x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-                    <form action="{{ route('admin.subjects.store') }}" method="POST">
+                    <form action="{{ route('admin.subjects.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start">
@@ -211,6 +223,10 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Kode / Singkatan</label>
                                             <input type="text" name="code" class="w-full border-gray-300 rounded-md shadow-sm focus:border-[#1a6341] focus:ring focus:ring-[#1a6341] focus:ring-opacity-50" required placeholder="Contoh: MATE-MINAT" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto Sampul / Banner (Opsional)</label>
+                                            <input type="file" name="cover_image" accept="image/*" class="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-semibold file:bg-[#1a6341] file:text-white hover:file:bg-[#238054]">
                                         </div>
                                     </div>
                                 </div>
@@ -239,7 +255,7 @@
                      x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                      class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
                     
-                    <form :action="`{{ url('admin/subjects') }}/${editData.id}`" method="POST">
+                    <form :action="`{{ url('admin/subjects') }}/${editData.id}`" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -259,6 +275,10 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Kode / Singkatan</label>
                                             <input type="text" name="code" x-model="editData.code" class="w-full border-gray-300 rounded-md shadow-sm focus:border-[#1a6341] focus:ring focus:ring-[#1a6341] focus:ring-opacity-50" required />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ganti Foto Sampul / Banner (Opsional)</label>
+                                            <input type="file" name="cover_image" accept="image/*" class="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-500 file:text-white hover:file:bg-amber-600">
                                         </div>
                                     </div>
                                 </div>

@@ -52,7 +52,7 @@
                             <p class="text-sm font-bold text-[#1a6341]">{{ Auth::user()->full_name ?? Auth::user()->name }}</p>
                         </div>
                         <div class="w-10 h-10 rounded-full bg-gray-300 overflow-hidden border-2 border-white shadow-sm group-hover:border-[#1a6341] transition-colors">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->full_name ?? Auth::user()->name) }}&background=1a6341&color=fff" alt="User" class="w-full h-full object-cover">
+                            <img src="{{ Auth::user()->profile_photo_url }}" alt="User" class="w-full h-full object-cover">
                         </div>
                     </button>
 
@@ -115,26 +115,37 @@
                             Kalender Akademik
                         </div>
                     </a>
+                    @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('teacher'))
                     <a href="{{ route('courses.index') }}" class="block px-4 py-3 {{ request()->routeIs('courses.*') ? 'bg-white text-[#1a6341] font-bold' : 'hover:bg-[#238054]' }}">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                             Courses
                         </div>
                     </a>
-                    @if(Auth::user()->hasRole('teacher') || Auth::user()->hasRole('admin'))
-                    <a href="{{ route('courses.index') }}" class="block px-4 py-3 {{ request()->routeIs('manage.courses.*') ? 'bg-white text-[#1a6341] font-bold' : 'hover:bg-[#238054]' }}">
-                        <div class="flex items-center">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            Manajemen Kelas
-                        </div>
-                    </a>
-                    @endif
-                    <a href="#" class="block px-4 py-3 hover:bg-[#1e754c]">
+
+                    <a href="{{ route('manage.attendances.dashboard') }}" class="block px-4 py-3 {{ request()->routeIs('manage.attendances.*') || request()->routeIs('manage.courses.attendances.*') ? 'bg-white text-[#1a6341] font-bold' : 'hover:bg-[#238054]' }}">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                             Manajemen Absensi
                         </div>
                     </a>
+                    @endif
+
+                    @if(Auth::user()->hasRole('student'))
+                    <a href="{{ route('courses.index') }}" class="block px-4 py-3 {{ request()->routeIs('courses.*') ? 'bg-white text-[#1a6341] font-bold' : 'hover:bg-[#238054]' }}">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            Kelas Anda
+                        </div>
+                    </a>
+
+                    <a href="{{ route('student.attendances.index') }}" class="block px-4 py-3 {{ request()->routeIs('student.attendances.*') ? 'bg-white text-[#1a6341] font-bold' : 'hover:bg-[#238054]' }}">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Absensi
+                        </div>
+                    </a>
+                    @endif
                     @if(Auth::user()->hasRole('admin'))
                     <div class="px-4 py-2 mt-2 text-xs font-semibold text-green-200 uppercase tracking-wider">
                         Admin
@@ -216,6 +227,7 @@
                     <span class="font-medium">Kalender Akademik</span>
                 </a>
 
+                @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('teacher'))
                 <a href="{{ route('courses.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-colors group {{ request()->routeIs('courses.*') ? 'bg-white text-[#1a6341] font-bold shadow-sm' : 'text-white hover:bg-[#238054]' }}">
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('courses.*') ? 'text-[#1a6341]' : 'text-green-100' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -223,21 +235,29 @@
                     <span class="font-medium">Courses</span>
                 </a>
 
-                @if(Auth::user()->hasRole('teacher') || Auth::user()->hasRole('admin'))
-                <a href="{{ route('courses.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-colors group {{ request()->routeIs('manage.courses.*') ? 'bg-white text-[#1a6341] font-bold shadow-sm' : 'text-white hover:bg-[#238054]' }}">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('manage.courses.*') ? 'text-[#1a6341]' : 'text-green-100' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                    <span class="font-medium">Manajemen Kelas</span>
-                </a>
-                @endif
-
-                <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-100 hover:bg-[#1e754c] transition-colors group">
-                    <svg class="w-5 h-5 mr-3 text-green-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('manage.attendances.dashboard') }}" class="flex items-center px-4 py-3 rounded-lg transition-colors group {{ request()->routeIs('manage.attendances.*') || request()->routeIs('manage.courses.attendances.*') ? 'bg-white text-[#1a6341] font-bold shadow-sm' : 'text-white hover:bg-[#238054]' }}">
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('manage.attendances.*') || request()->routeIs('manage.courses.attendances.*') ? 'text-[#1a6341]' : 'text-green-100' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                     <span class="font-medium">Manajemen Absensi</span>
                 </a>
+                @endif
+
+                @if(Auth::user()->hasRole('student'))
+                <a href="{{ route('courses.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-colors group {{ request()->routeIs('courses.*') ? 'bg-white text-[#1a6341] font-bold shadow-sm' : 'text-white hover:bg-[#238054]' }}">
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('courses.*') ? 'text-[#1a6341]' : 'text-green-100' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    <span class="font-medium">Kelas Anda</span>
+                </a>
+
+                <a href="{{ route('student.attendances.index') }}" class="flex items-center px-4 py-3 rounded-lg transition-colors group {{ request()->routeIs('student.attendances.*') ? 'bg-white text-[#1a6341] font-bold shadow-sm' : 'text-white hover:bg-[#238054]' }}">
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('student.attendances.*') ? 'text-[#1a6341]' : 'text-green-100' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <span class="font-medium">Absensi</span>
+                </a>
+                @endif
 
                 @if(Auth::user()->hasRole('admin'))
                 <!-- Group: ADMIN -->

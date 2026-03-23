@@ -55,7 +55,6 @@ class StudentQuizController extends Controller
         $activeAttempt = $attempts->where('is_submitted', false)->first();
 
         $breadcrumbs = [
-            ['label' => 'Courses', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('courses.show', $course)],
             ['label' => $quiz->title],
         ];

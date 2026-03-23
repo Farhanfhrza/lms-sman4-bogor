@@ -80,14 +80,9 @@
                                 $colorIndex = $course->id % 6;
                             @endphp
                             <div class="h-40 w-full relative overflow-hidden bg-gradient-to-br from-{{ $colors[$colorIndex] }}-400 to-{{ $colors[$colorIndex] }}-600 flex items-center justify-center">
-                                <!-- Subject Icon/Text -->
-                                <div class="text-white text-center p-4">
-                                    <svg class="w-16 h-16 mx-auto mb-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                    </svg>
-                                </div>
+                                <img src="{{ $course->subject->cover_image_url }}" alt="{{ $course->subject->name ?? 'Course' }}" class="absolute inset-0 w-full h-full object-cover">
                                 <!-- Overlay for hover effect -->
-                                <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                                <div class="absolute inset-0 bg-black bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300"></div>
                             </div>
 
                             <!-- Card Info -->
@@ -99,9 +94,12 @@
                                     {{ $course->schoolClass->name ?? '-' }}
                                 </p>
                                 @if($course->teacher)
-                                <p class="text-xs text-gray-400 mt-2">
-                                    {{ $course->teacher->user->full_name ?? 'Teacher' }}
-                                </p>
+                                <div class="flex items-center justify-center mt-3 space-x-2">
+                                    <img src="{{ $course->teacher->user->profile_photo_url }}" alt="" class="w-6 h-6 rounded-full object-cover shadow-sm">
+                                    <p class="text-xs text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                                        {{ $course->teacher->user->full_name ?? 'Teacher' }}
+                                    </p>
+                                </div>
                                 @endif
                             </div>
                         </a>

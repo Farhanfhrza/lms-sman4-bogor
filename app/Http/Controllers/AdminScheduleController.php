@@ -63,7 +63,6 @@ class AdminScheduleController extends Controller
         }
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Penjadwalan Kelas'],
         ];
 

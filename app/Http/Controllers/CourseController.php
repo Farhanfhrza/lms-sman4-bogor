@@ -89,7 +89,6 @@ class CourseController extends Controller
 
         // Breadcrumb data (English)
         $breadcrumbs = [
-            ['label' => 'Courses', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course Detail'],
         ];
 

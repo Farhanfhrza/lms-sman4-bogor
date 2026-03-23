@@ -1,0 +1,26 @@
+
+   INFO  Running migrations.  
+
+  2026_03_23_090704_create_course_meetings_table  33.78ms FAIL
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "courses" does not exist (Connection: pgsql, SQL: alter table "course_meetings" add constraint "course_meetings_course_id_foreign" foreign key ("course_id") references "courses" ("id") on delete cascade)
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:825
+    821▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    822▕                 );
+    823▕             }
+    824▕ 
+  ➜ 825▕             throw new QueryException(
+    826▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    827▕             );
+    828▕         }
+    829▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:571
+      PDOException::("SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "courses" does not exist")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:571
+      PDOStatement::execute()
+

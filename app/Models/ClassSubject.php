@@ -102,4 +102,9 @@ class ClassSubject extends Model
     {
         return $this->hasMany(ClassSchedule::class, 'class_subject_id');
     }
+
+    public function courseMeetings()
+    {
+        return $this->hasMany(CourseMeeting::class, 'class_subject_id');
+    }
 }

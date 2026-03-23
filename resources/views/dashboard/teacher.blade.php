@@ -79,8 +79,8 @@
                                     <a href="{{ route('courses.show', $cs->slug) }}" class="group block border border-gray-200 rounded-lg p-4 hover:border-indigo-500 hover:shadow-md transition-all bg-gray-50 hover:bg-white relative overflow-hidden">
                                         <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                         <div class="flex items-start">
-                                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3 flex-shrink-0">
-                                                {{ substr($cs->subject->name ?? '?', 0, 1) }}
+                                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3 flex-shrink-0 overflow-hidden border border-gray-200">
+                                                <img src="{{ $cs->subject->cover_image_url }}" alt="{{ $cs->subject->name ?? 'Unknown' }}" class="w-full h-full object-cover">
                                             </div>
                                             <div>
                                                 <h4 class="font-bold text-gray-900 group-hover:text-indigo-600 line-clamp-1" title="{{ $cs->subject->name ?? 'Unknown' }}">

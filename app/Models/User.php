@@ -28,7 +28,21 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'is_active',
         'email_verified_at',
+        'profile_photo_path',
     ];
+
+    /**
+     * Get the URL to the user's profile photo.
+     *
+     * @return string
+     */
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo_path) {
+            return asset('storage/' . $this->profile_photo_path);
+        }
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->full_name ?? $this->name ?? 'User') . '&background=1a6341&color=fff&size=128';
+    }
 
     /**
      * The attributes that should be hidden for serialization.

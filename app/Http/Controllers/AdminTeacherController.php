@@ -36,7 +36,6 @@ class AdminTeacherController extends Controller
         $teachers = $query->paginate($perPage)->withQueryString();
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Data Guru'],
         ];
 
@@ -49,7 +48,6 @@ class AdminTeacherController extends Controller
     public function create(): View
     {
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Data Guru', 'url' => route('admin.teachers.index')],
             ['label' => 'Tambah Guru'],
         ];
@@ -70,15 +68,22 @@ class AdminTeacherController extends Controller
             'nip'            => 'nullable|string|max:30|unique:teachers,nip',
             'specialization' => 'nullable|string|max:255',
             'password'       => 'required|string|min:8',
+            'profile_photo'  => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         DB::transaction(function () use ($request) {
+            $photoPath = null;
+            if ($request->hasFile('profile_photo')) {
+                $photoPath = $request->file('profile_photo')->store('profiles', 'public');
+            }
+
             $user = User::create([
                 'full_name'        => $request->full_name,
                 'login_identifier' => $request->login_id,
                 'email'            => $request->email,
                 'gender'           => $request->gender,
                 'password'         => Hash::make($request->password),
+                'profile_photo_path' => $photoPath,
             ]);
 
             $user->assignRole('teacher');
@@ -107,7 +112,6 @@ class AdminTeacherController extends Controller
         $assignedSubjectIds = $teacher->subjects->pluck('id')->toArray();
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Data Guru', 'url' => route('admin.teachers.index')],
             ['label' => 'Edit: ' . ($teacher->user->full_name ?? '')],
         ];
@@ -130,6 +134,7 @@ class AdminTeacherController extends Controller
             'nip'            => 'nullable|string|max:30|unique:teachers,nip,' . $teacher->id,
             'specialization' => 'nullable|string|max:255',
             'password'       => 'nullable|string|min:8',
+            'profile_photo'  => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         DB::transaction(function () use ($request, $teacher) {
@@ -139,6 +144,13 @@ class AdminTeacherController extends Controller
                 'email'            => $request->email,
                 'gender'           => $request->gender,
             ];
+
+            if ($request->hasFile('profile_photo')) {
+                if ($teacher->user->profile_photo_path) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($teacher->user->profile_photo_path);
+                }
+                $userData['profile_photo_path'] = $request->file('profile_photo')->store('profiles', 'public');
+            }
 
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);

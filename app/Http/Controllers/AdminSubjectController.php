@@ -29,7 +29,6 @@ class AdminSubjectController extends Controller
             ->paginate(15, ['*'], 'class_subjects_page');
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Mata Pelajaran'],
         ];
 
@@ -44,11 +43,18 @@ class AdminSubjectController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:subjects,code',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
+
+        $coverPath = null;
+        if ($request->hasFile('cover_image')) {
+            $coverPath = $request->file('cover_image')->store('covers', 'public');
+        }
 
         $subject = Subject::create([
             'name' => $request->name,
             'code' => $request->code,
+            'cover_image_path' => $coverPath,
         ]);
 
         ActivityLogger::log(null, 'created', $subject, 'Menambahkan mapel baru: ' . $subject->name);
@@ -64,12 +70,22 @@ class AdminSubjectController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:subjects,code,' . $subject->id,
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $subject->update([
+        $updateData = [
             'name' => $request->name,
             'code' => $request->code,
-        ]);
+        ];
+
+        if ($request->hasFile('cover_image')) {
+            if ($subject->cover_image_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($subject->cover_image_path);
+            }
+            $updateData['cover_image_path'] = $request->file('cover_image')->store('covers', 'public');
+        }
+
+        $subject->update($updateData);
 
         ActivityLogger::log(null, 'updated', $subject, 'Memperbarui mapel: ' . $subject->name);
 
@@ -97,7 +113,6 @@ class AdminSubjectController extends Controller
             ->paginate(10);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Mata Pelajaran', 'url' => route('admin.subjects.index')],
             ['label' => 'Detail Mapel'],
         ];

@@ -13,6 +13,8 @@ use App\Http\Controllers\AdminSubjectController;
 use App\Http\Controllers\AdminStudentController;
 use App\Http\Controllers\AdminScheduleController;
 use App\Http\Controllers\StudentQuizController;
+use App\Http\Controllers\CourseAttendanceController;
+use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
@@ -63,6 +65,13 @@ Route::middleware(['auth', 'check.email'])->group(function () {
         Route::get('/{attempt}', [StudentQuizController::class, 'take'])->name('take');
         Route::post('/{attempt}/answer', [StudentQuizController::class, 'saveAnswer'])->name('saveAnswer');
         Route::post('/{attempt}/submit', [StudentQuizController::class, 'submit'])->name('submit');
+    });
+
+    // Attendances
+    Route::prefix('attendances')->name('student.attendances.')->group(function () {
+        Route::get('/', [StudentAttendanceController::class, 'index'])->name('index');
+        Route::get('/{course:slug}', [StudentAttendanceController::class, 'show'])->name('show');
+        Route::post('/{course:slug}/meetings/{meeting}/submit', [StudentAttendanceController::class, 'submit'])->name('submit');
     });
 
     // Academic Calendar Routes
@@ -133,6 +142,10 @@ Route::middleware(['auth', 'check.email'])->group(function () {
 
     // --- Teacher Course Management ---
     Route::middleware(['role:admin|teacher'])->group(function () {
+        
+        // Global Attendance Dashboard
+        Route::get('manage/attendances', [CourseAttendanceController::class, 'dashboard'])->name('manage.attendances.dashboard');
+
         Route::prefix('manage/courses/{course}')->name('manage.courses.')->group(function () {
             // Course manage page
             Route::get('/', [TeacherCourseController::class, 'manage'])->name('show');
@@ -169,6 +182,15 @@ Route::middleware(['auth', 'check.email'])->group(function () {
             Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
             Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
             Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
+
+            // Attendances CRUD
+            Route::prefix('attendances')->name('attendances.')->group(function () {
+                Route::get('/', [CourseAttendanceController::class, 'index'])->name('index');
+                Route::get('/recap', [CourseAttendanceController::class, 'recap'])->name('recap');
+                Route::post('/meetings', [CourseAttendanceController::class, 'storeMeeting'])->name('meetings.store');
+                Route::get('/meetings/{meeting}', [CourseAttendanceController::class, 'showMeeting'])->name('showMeeting');
+                Route::put('/meetings/{meeting}/roster', [CourseAttendanceController::class, 'updateRoster'])->name('updateRoster');
+            });
         });
     });
 });

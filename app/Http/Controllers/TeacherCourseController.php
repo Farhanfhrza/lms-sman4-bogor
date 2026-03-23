@@ -10,6 +10,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class TeacherCourseController extends Controller
 {
@@ -47,8 +48,6 @@ class TeacherCourseController extends Controller
         ]);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course'],
         ];
 
@@ -64,11 +63,20 @@ class TeacherCourseController extends Controller
 
         $request->validate([
             'general_info' => 'nullable|string|max:10000',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $course->update([
             'general_info' => $request->general_info,
         ]);
+
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store('subjects', 'public');
+            if ($course->subject->cover_image_path && Storage::disk('public')->exists($course->subject->cover_image_path)) {
+                Storage::disk('public')->delete($course->subject->cover_image_path);
+            }
+            $course->subject->update(['cover_image_path' => $path]);
+        }
 
         ActivityLogger::log($course->id, 'updated', $course, 'Memperbarui informasi umum kelas');
 

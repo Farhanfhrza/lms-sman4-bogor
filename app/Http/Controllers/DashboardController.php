@@ -62,6 +62,19 @@ class DashboardController extends Controller
                         // Include all upcoming or past unsubmitted
                         ->orderBy('due_date', 'asc')
                         ->get();
+                        
+                    // Get active attendance meetings needing self check-in
+                    $now = now();
+                    $activeMeetings = \App\Models\CourseMeeting::with(['classSubject.subject'])
+                        ->whereIn('class_subject_id', $classSubjects->pluck('id'))
+                        ->whereDate('meeting_date', $now->toDateString())
+                        ->whereTime('start_time', '<=', $now->toTimeString())
+                        ->whereTime('end_time', '>=', $now->toTimeString())
+                        ->whereDoesntHave('attendances', function($q) use ($student, $user) {
+                            $q->where('student_id', $student->id)
+                              ->where('recorded_by', $user->id);
+                        })
+                        ->get();
                 }
             }
 
@@ -71,7 +84,8 @@ class DashboardController extends Controller
                 'studentClass', 
                 'classSubjects', 
                 'todaySchedules',
-                'pendingAssignments'
+                'pendingAssignments',
+                'activeMeetings'
             ));
         }
         

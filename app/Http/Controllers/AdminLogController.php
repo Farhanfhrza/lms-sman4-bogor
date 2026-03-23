@@ -44,7 +44,6 @@ class AdminLogController extends Controller
         $logs = $query->paginate($perPage)->withQueryString();
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Log Aktivitas'],
         ];
 

@@ -59,15 +59,19 @@
                                     <a href="{{ route('courses.show', $cs->slug) }}" class="group block border border-gray-200 rounded-lg p-4 hover:border-[#1a6341] hover:shadow-md transition-all bg-gray-50 hover:bg-white relative overflow-hidden">
                                         <div class="absolute top-0 left-0 w-1 h-full bg-[#1a6341] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                         <div class="flex items-start">
-                                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-[#1a6341] font-bold mr-3 flex-shrink-0">
-                                                {{ substr($cs->subject->name ?? '?', 0, 1) }}
+                                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-[#1a6341] font-bold mr-3 flex-shrink-0 overflow-hidden border border-gray-200">
+                                                <img src="{{ $cs->subject->cover_image_url }}" alt="{{ $cs->subject->name ?? 'Unknown' }}" class="w-full h-full object-cover">
                                             </div>
                                             <div>
                                                 <h4 class="font-bold text-gray-900 group-hover:text-[#1a6341] line-clamp-1" title="{{ $cs->subject->name ?? 'Unknown' }}">
                                                     {{ $cs->subject->name ?? 'Unknown' }}
                                                 </h4>
                                                 <p class="text-xs text-gray-500 mt-1 flex items-center">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                                    @if($cs->teacher && $cs->teacher->user)
+                                                        <img src="{{ $cs->teacher->user->profile_photo_url }}" class="w-4 h-4 rounded-full mr-1 object-cover">
+                                                    @else
+                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                                    @endif
                                                     {{ $cs->teacher->user->full_name ?? 'N/A' }}
                                                 </p>
                                             </div>
@@ -171,6 +175,44 @@
             <!-- Side Column (Right) -->
             <div class="space-y-6">
                 
+                <!-- Absensi Terbuka / Active Check-ins -->
+                @if(isset($activeMeetings) && $activeMeetings->count() > 0)
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative border-t-4 border-green-500">
+                    <div class="p-5 border-b border-gray-100 bg-green-50">
+                        <h3 class="font-bold text-lg text-green-800 flex items-center justify-between">
+                            <span class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Isi Absensi Sekarang
+                            </span>
+                            <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-bold shadow-sm">
+                                {{ $activeMeetings->count() }} Terbuka
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="p-0">
+                        <ul class="divide-y divide-gray-100">
+                            @foreach($activeMeetings as $meeting)
+                            <li class="p-4 hover:bg-green-50 transition-colors border-l-4 border-transparent hover:border-[#1a6341]">
+                                <a href="{{ route('student.attendances.show', $meeting->classSubject->slug ?? $meeting->class_subject_id) }}" class="flex justify-between items-center group">
+                                    <div class="flex-1">
+                                        <h4 class="font-bold text-gray-800 text-sm group-hover:text-[#1a6341] transition-colors">{{ $meeting->classSubject->subject->name ?? 'Mata Pelajaran' }}</h4>
+                                        <p class="text-xs text-gray-500 mt-0.5">Materi: {{ $meeting->title }}</p>
+                                        <div class="text-[11px] mt-1 flex items-center text-rose-600 font-semibold">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            Ditutup pukul {{ \Carbon\Carbon::parse($meeting->end_time)->format('H:i') }}
+                                        </div>
+                                    </div>
+                                    <div class="bg-green-100 text-green-700 p-2 rounded-lg group-hover:bg-[#1a6341] group-hover:text-white transition-colors ml-3 cursor-pointer">
+                                        Absen
+                                    </div>
+                                </a>
+                            </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                @endif
+
                 <!-- Jadwal Hari Ini -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative border-t-4 border-yellow-400">
                     <div class="p-5 border-b border-gray-100">

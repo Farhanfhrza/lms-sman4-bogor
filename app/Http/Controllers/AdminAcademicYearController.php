@@ -17,7 +17,6 @@ class AdminAcademicYearController extends Controller
         $academicYears = AcademicYear::orderByDesc('name')->get();
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Tahun Ajaran'],
         ];
 

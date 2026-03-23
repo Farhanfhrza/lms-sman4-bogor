@@ -6,9 +6,14 @@
             <x-breadcrumb :items="$breadcrumbs" />
 
             {{-- Course Header Banner --}}
-            <div class="bg-[#1a6341] rounded-xl p-6 mb-8 shadow-lg">
-                <h1 class="text-2xl md:text-3xl font-bold text-white">{{ $course->subject->name ?? 'Course' }}</h1>
-                <p class="text-green-200 text-sm mt-1">{{ $course->schoolClass->name ?? '' }}</p>
+            <div class="relative bg-[#1a6341] rounded-xl overflow-hidden p-6 mb-8 shadow-lg min-h-[140px] flex flex-col justify-end">
+                <div class="absolute inset-0">
+                    <img src="{{ $course->subject->cover_image_url }}" alt="Cover" class="w-full h-full object-cover mix-blend-overlay opacity-50">
+                </div>
+                <div class="relative z-10">
+                    <h1 class="text-2xl md:text-3xl font-bold text-white">{{ $course->subject->name ?? 'Course' }}</h1>
+                    <p class="text-green-200 text-sm mt-1 font-medium">{{ $course->schoolClass->name ?? '' }}</p>
+                </div>
             </div>
 
             {{-- Flash Messages --}}
@@ -83,14 +88,25 @@
 
                 {{-- Edit Mode --}}
                 <div x-show="editingInfo" x-cloak>
-                    <form action="{{ route('manage.courses.update-info', $course) }}" method="POST" id="formGeneralInfo">
+                    <form action="{{ route('manage.courses.update-info', $course) }}" method="POST" id="formGeneralInfo" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-                        <input type="hidden" name="general_info" id="general_info_input" value="{{ old('general_info', $course->general_info) }}">
-                        <div id="editor-container" class="border border-gray-300 rounded-lg min-h-[200px] bg-white"></div>
-                        <div class="flex justify-end mt-3 gap-2">
-                            <button type="button" @click="editingInfo = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">Batal</button>
-                            <button type="submit" class="px-4 py-2 text-sm text-white bg-[#1a6341] hover:bg-[#145232] rounded-lg shadow-sm">Simpan</button>
+                        
+                        <div class="mb-5">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Ganti Banners / Foto Sampul Mapel (Opsional)</label>
+                            <input type="file" name="cover_image" accept="image/*" class="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2.5 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-bold file:bg-[#1a6341] file:text-white hover:file:bg-[#238054] transition-colors">
+                            <p class="mt-1 text-xs text-gray-500">Foto sampul akan menimpa foto master mapel secara global.</p>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Informasi Umum Topik Kelas</label>
+                            <input type="hidden" name="general_info" id="general_info_input" value="{{ old('general_info', $course->general_info) }}">
+                            <div id="editor-container" class="border border-gray-300 rounded-lg min-h-[200px] bg-white"></div>
+                        </div>
+                        
+                        <div class="flex justify-end mt-4 gap-2 border-t border-gray-100 pt-4">
+                            <button type="button" @click="editingInfo = false" class="px-5 py-2 text-sm font-bold text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors">Batal</button>
+                            <button type="submit" class="px-5 py-2 text-sm font-bold text-white bg-[#1a6341] hover:bg-[#145232] rounded-lg shadow-sm transition-colors">Simpan Perubahan</button>
                         </div>
                     </form>
                 </div>

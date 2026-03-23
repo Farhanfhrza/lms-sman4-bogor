@@ -53,7 +53,6 @@ class MaterialController extends Controller
         // Breadcrumb data
         $classSubject = $material->section->classSubject;
         $breadcrumbs = [
-            ['label' => 'Courses', 'url' => route('courses.index')],
             ['label' => $classSubject->subject->name ?? 'Course', 'url' => route('courses.show', $classSubject)],
             ['label' => $material->section->title ?? 'Section'],
             ['label' => $material->title ?? 'Material'],
@@ -107,8 +106,6 @@ class MaterialController extends Controller
         $course->load(['subject', 'schoolClass', 'sections' => fn($q) => $q->orderBy('order_number')]);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => 'Tambah Materi'],
         ];
@@ -177,8 +174,6 @@ class MaterialController extends Controller
         $course->load(['subject', 'schoolClass', 'sections' => fn($q) => $q->orderBy('order_number')]);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => 'Edit Materi'],
         ];

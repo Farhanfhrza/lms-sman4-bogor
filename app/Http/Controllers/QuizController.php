@@ -27,8 +27,6 @@ class QuizController extends Controller
         $course->load(['subject', 'schoolClass', 'sections' => fn($q) => $q->orderBy('order_number')]);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => 'Tambah Kuis'],
         ];
@@ -149,8 +147,6 @@ class QuizController extends Controller
         $quiz->load(['questions' => fn($q) => $q->orderBy('order_number'), 'questions.options']);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => 'Edit Kuis'],
         ];
@@ -389,8 +385,6 @@ class QuizController extends Controller
         $course->load(['subject', 'schoolClass']);
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
-            ['label' => 'Manajemen Kelas', 'url' => route('courses.index')],
             ['label' => $course->subject->name ?? 'Course', 'url' => route('manage.courses.show', $course)],
             ['label' => $quiz->title ?? 'Kuis'],
         ];

@@ -384,6 +384,17 @@
         <p style="opacity: 0.6; margin-top: 12px;">Kuis Anda sedang otomatis dikumpulkan...</p>
     </div>
 
+    {{-- Violation Warning Overlay --}}
+    <div class="violation-overlay" id="warningOverlay" style="background: rgba(245, 158, 11, 0.95);">
+        <div class="violation-icon" style="background: #fff; color: #f59e0b;">
+            <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+        </div>
+        <h2>Peringatan Pelanggaran!</h2>
+        <p id="warningMessage" style="color: #fff; font-weight: 600; font-size: 18px; margin-bottom: 8px;">Anda terdeteksi meninggalkan halaman kuis.</p>
+        <p id="warningCounter" style="font-size: 16px; margin-bottom: 32px; opacity: 0.9;">(Teguran 1 dari 3)</p>
+        <button type="button" onclick="dismissWarning()" style="padding: 14px 28px; background: #fff; color: #f59e0b; border: none; border-radius: 8px; font-weight: 800; font-size: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Saya Mengerti & Kembali</button>
+    </div>
+
     <script>
         // ============ CONFIG ============
         const REMAINING_SECONDS = {{ $remainingSeconds !== null ? (int) $remainingSeconds : 'null' }};
@@ -520,6 +531,34 @@
             }, 2000);
         }
 
+        // ============ VIOLATION HANDLER ============
+        let warningCount = 0;
+        const MAX_WARNINGS = 3;
+
+        function handleViolation(reason) {
+            if (isSubmitting) return;
+
+            // Jika warning sudah muncul, abaikan event lain sementara
+            if (document.getElementById('warningOverlay').classList.contains('active')) {
+                return;
+            }
+
+            warningCount++;
+
+            if (warningCount >= MAX_WARNINGS) {
+                autoSubmit(reason + ` (Telah melanggar batas peringatan ${MAX_WARNINGS} kali)`);
+            } else {
+                document.getElementById('warningMessage').textContent = `Sistem mendeteksi Anda: ${reason}.`;
+                document.getElementById('warningCounter').textContent = `(Teguran ${warningCount} dari maksimal ${MAX_WARNINGS} Toleransi)`;
+                document.getElementById('warningOverlay').classList.add('active');
+            }
+        }
+
+        function dismissWarning() {
+            document.getElementById('warningOverlay').classList.remove('active');
+            enterFullscreen();
+        }
+
         // ============ FULLSCREEN ============
         function enterFullscreen() {
             const el = document.documentElement;
@@ -542,20 +581,20 @@
         // ============ ANTI-CHEAT: FULLSCREEN EXIT ============
         document.addEventListener('fullscreenchange', function () {
             if (!document.fullscreenElement && !isSubmitting) {
-                autoSubmit('Keluar dari mode fullscreen');
+                handleViolation('Keluar dari mode fullscreen');
             }
         });
 
         document.addEventListener('webkitfullscreenchange', function () {
             if (!document.webkitFullscreenElement && !isSubmitting) {
-                autoSubmit('Keluar dari mode fullscreen');
+                handleViolation('Keluar dari mode fullscreen');
             }
         });
 
         // ============ ANTI-CHEAT: TAB SWITCH ============
         document.addEventListener('visibilitychange', function () {
             if (document.hidden && !isSubmitting) {
-                autoSubmit('Membuka tab atau aplikasi lain');
+                handleViolation('Membuka tab atau aplikasi lain');
             }
         });
 
@@ -563,7 +602,7 @@
         window.addEventListener('blur', function () {
             // Extra detection in some browsers
             if (!isSubmitting) {
-                autoSubmit('Meninggalkan halaman kuis');
+                handleViolation('Meninggalkan fokus halaman kuis');
             }
         });
 

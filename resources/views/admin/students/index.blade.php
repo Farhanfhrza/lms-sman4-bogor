@@ -95,7 +95,14 @@
                         @forelse($students as $index => $student)
                         <tr class="hover:bg-gray-50 transition-colors {{ $index % 2 === 0 ? 'bg-gray-100' : '' }}">
                             <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $students->firstItem() + $index }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-700">{{ $student->user->full_name ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="h-10 w-10 flex-shrink-0 mr-3 rounded-full overflow-hidden border border-gray-200 shadow-sm">
+                                        <img class="h-10 w-10 object-cover" src="{{ optional($student->user)->profile_photo_url }}" alt="">
+                                    </div>
+                                    <div class="font-medium text-gray-700">{{ $student->user->full_name ?? '-' }}</div>
+                                </div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $student->user->email ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-mono">{{ $student->nisn ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-600">

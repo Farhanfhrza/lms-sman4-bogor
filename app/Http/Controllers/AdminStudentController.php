@@ -57,7 +57,6 @@ class AdminStudentController extends Controller
         $schoolClasses = SchoolClass::orderBy('name')->get();
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Data Siswa'],
         ];
 
@@ -70,7 +69,6 @@ class AdminStudentController extends Controller
     public function create(): View
     {
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Data Siswa', 'url' => route('admin.students.index')],
             ['label' => 'Tambah Siswa'],
         ];
@@ -90,9 +88,15 @@ class AdminStudentController extends Controller
             'nisn'            => 'required|string|max:20|unique:students,nisn',
             'enrollment_year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
             'password'        => 'required|string|min:8',
+            'profile_photo'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         DB::transaction(function () use ($request) {
+            $photoPath = null;
+            if ($request->hasFile('profile_photo')) {
+                $photoPath = $request->file('profile_photo')->store('profiles', 'public');
+            }
+
             // Check if a soft-deleted user with same login_identifier exists
             $existingUser = User::withTrashed()->where('login_identifier', $request->nisn)->first();
 
@@ -104,6 +108,7 @@ class AdminStudentController extends Controller
                     'email'     => $request->email,
                     'gender'    => $request->gender,
                     'password'  => Hash::make($request->password),
+                    'profile_photo_path' => $photoPath,
                 ]);
                 $user = $existingUser;
 
@@ -117,6 +122,7 @@ class AdminStudentController extends Controller
                     'email'            => $request->email,
                     'gender'           => $request->gender,
                     'password'         => Hash::make($request->password),
+                    'profile_photo_path' => $photoPath,
                 ]);
 
                 $user->assignRole('student');
@@ -143,7 +149,6 @@ class AdminStudentController extends Controller
         $student->load('user');
 
         $breadcrumbs = [
-            ['label' => 'Dashboard', 'url' => route('dashboard')],
             ['label' => 'Data Siswa', 'url' => route('admin.students.index')],
             ['label' => 'Edit: ' . ($student->user->full_name ?? '')],
         ];
@@ -164,6 +169,7 @@ class AdminStudentController extends Controller
             'nisn'            => 'required|string|max:20|unique:students,nisn,' . $student->id,
             'enrollment_year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
             'password'        => 'nullable|string|min:8',
+            'profile_photo'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         DB::transaction(function () use ($request, $student) {
@@ -172,6 +178,13 @@ class AdminStudentController extends Controller
                 'login_identifier' => $request->nisn,
                 'email'            => $request->email,
             ];
+
+            if ($request->hasFile('profile_photo')) {
+                if ($student->user->profile_photo_path) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($student->user->profile_photo_path);
+                }
+                $userData['profile_photo_path'] = $request->file('profile_photo')->store('profiles', 'public');
+            }
 
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
