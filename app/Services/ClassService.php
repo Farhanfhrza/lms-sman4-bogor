@@ -261,9 +261,14 @@ class ClassService
             ->where('academic_year_id', $classSubject->academic_year_id)
             ->with(['student.user'])
             ->get()
+            ->sortBy(function($studentClass) {
+                $num = $studentClass->attendance_number ?? 999;
+                $name = $studentClass->student->user->full_name ?? '';
+                return sprintf('%03d-%s', $num, $name);
+            })
             ->map(function($studentClass) {
                 return $studentClass->student->user ?? null;
-            })->filter();
+            })->filter()->values();
     }
 
     /**

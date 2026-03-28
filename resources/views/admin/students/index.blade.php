@@ -207,31 +207,42 @@
                     </div>
 
                     <!-- Format Instructions -->
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-                        <p class="font-semibold text-blue-800 mb-2">📋 Format File Excel:</p>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm mt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="font-semibold text-blue-800">📋 Contoh Format File Excel/CSV:</p>
+                            <a href="{{ asset('templates/import_siswa_template.csv') }}" download class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded shadow-sm inline-flex flex-shrink-0 items-center transition-colors">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download Template CSV
+                            </a>
+                        </div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-xs border border-blue-200">
                                 <thead>
                                     <tr class="bg-blue-100">
                                         <th class="border border-blue-200 px-3 py-1 text-left">Kolom A: <strong>NAMA</strong></th>
                                         <th class="border border-blue-200 px-3 py-1 text-left">Kolom B: <strong>NISN</strong></th>
+                                        <th class="border border-blue-200 px-3 py-1 text-left">Kolom C: <strong>JENIS_KELAMIN</strong></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td class="border border-blue-200 px-3 py-1 text-gray-600">Budi Santoso</td>
                                         <td class="border border-blue-200 px-3 py-1 text-gray-600 font-mono">0012345678</td>
+                                        <td class="border border-blue-200 px-3 py-1 text-gray-600 font-mono text-center">L</td>
                                     </tr>
                                     <tr class="bg-blue-50">
                                         <td class="border border-blue-200 px-3 py-1 text-gray-600">Ani Rahmawati</td>
                                         <td class="border border-blue-200 px-3 py-1 text-gray-600 font-mono">0098765432</td>
+                                        <td class="border border-blue-200 px-3 py-1 text-gray-600 font-mono text-center">P</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <p class="mt-2 text-blue-600 text-xs">
-                            ✅ Email akan otomatis di-generate: <code class="bg-blue-100 px-1 rounded">[NISN]@student.sman4bogor.sch.id</code><br>
-                            ✅ Password default: <code class="bg-blue-100 px-1 rounded">Siswa[NISN]</code>
+                        <p class="mt-3 text-blue-600 text-xs space-y-1">
+                            ✅ <strong>NAMA</strong> dan <strong>NISN</strong> adalah kolom wajib isi.<br>
+                            ✅ <strong>JENIS_KELAMIN</strong> diisi dengan <strong>L</strong> (Laki-laki) atau <strong>P</strong> (Perempuan).<br>
+                            ✅ Email akan otomatis di-generate format: <code class="bg-blue-100 px-1 rounded">[NISN]@student.sman4bogor.sch.id</code><br>
+                            ✅ Password default akun (bisa dirubah siswa nanti): <code class="bg-blue-100 px-1 rounded">Siswa[NISN]</code>
                         </p>
                     </div>
 

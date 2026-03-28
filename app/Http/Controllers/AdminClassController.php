@@ -168,24 +168,33 @@ class AdminClassController extends Controller
         $studentIds = $validated['enrolled_students'] ?? [];
 
         DB::transaction(function () use ($schoolClass, $studentIds) {
-            // Remove existing students from THIS class
-            StudentClass::where('class_id', $schoolClass->id)
+            $existingIds = StudentClass::where('class_id', $schoolClass->id)
                 ->where('academic_year_id', $schoolClass->academic_year_id)
-                ->delete();
+                ->pluck('student_id')
+                ->toArray();
 
-            // Insert new students
-            $inserts = [];
-            foreach ($studentIds as $id) {
-                $inserts[] = [
-                    'student_id' => $id,
-                    'class_id' => $schoolClass->id,
-                    'academic_year_id' => $schoolClass->academic_year_id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+            $toRemove = array_diff($existingIds, $studentIds);
+            $toAdd = array_diff($studentIds, $existingIds);
+
+            if (!empty($toRemove)) {
+                StudentClass::where('class_id', $schoolClass->id)
+                    ->where('academic_year_id', $schoolClass->academic_year_id)
+                    ->whereIn('student_id', $toRemove)
+                    ->delete();
             }
 
-            if (!empty($inserts)) {
+            if (!empty($toAdd)) {
+                $inserts = [];
+                foreach ($toAdd as $id) {
+                    $inserts[] = [
+                        'student_id' => $id,
+                        'class_id' => $schoolClass->id,
+                        'academic_year_id' => $schoolClass->academic_year_id,
+                        'attendance_number' => null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
                 StudentClass::insert($inserts);
             }
         });
@@ -193,5 +202,61 @@ class AdminClassController extends Controller
         ActivityLogger::log(null, 'updated', $schoolClass, "Memperbarui daftar siswa di kelas {$schoolClass->name}");
 
         return redirect()->route('admin.classes.show', $schoolClass)->with('success', 'Daftar siswa berhasil diperbarui.');
+    }
+
+    public function generateAttendanceNumbers(SchoolClass $schoolClass): RedirectResponse
+    {
+        $activeYearId = $schoolClass->academic_year_id;
+        
+        // Get all students enrolled in this class for this academic year, sorted by full_name
+        $studentClasses = StudentClass::where('class_id', $schoolClass->id)
+            ->where('academic_year_id', $activeYearId)
+            ->join('students', 'student_classes.student_id', '=', 'students.id')
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->orderBy('users.full_name', 'asc')
+            ->select('student_classes.*')
+            ->get();
+
+        $number = 1;
+        foreach ($studentClasses as $sc) {
+            $sc->update(['attendance_number' => $number]);
+            $number++;
+        }
+
+        ActivityLogger::log(null, 'updated', $schoolClass, "Generate otomatis nomor absen kelas {$schoolClass->name}");
+
+        return redirect()->route('admin.classes.show', $schoolClass)->with('success', 'Nomor absen berhasil digenerate berdasarkan abjad.');
+    }
+
+    public function updateAttendanceNumbers(Request $request, SchoolClass $schoolClass): RedirectResponse
+    {
+        $validated = $request->validate([
+            'attendance_numbers' => 'required|array',
+            'attendance_numbers.*' => 'nullable|integer|min:1',
+        ]);
+
+        $activeYearId = $schoolClass->academic_year_id;
+
+        // Cek duplikasi nomor absen (abaikan yang null/kosong)
+        $numbers = array_filter($validated['attendance_numbers'], function($val) {
+            return !is_null($val) && $val !== '';
+        });
+
+        if (count($numbers) !== count(array_unique($numbers))) {
+            return back()->with('error', 'Gagal menyimpan: Terdapat nomor absen yang ganda (duplikat). Setiap siswa harus memiliki nomor absen unik.');
+        }
+
+        DB::transaction(function () use ($schoolClass, $activeYearId, $validated) {
+            foreach ($validated['attendance_numbers'] as $studentId => $number) {
+                StudentClass::where('class_id', $schoolClass->id)
+                    ->where('academic_year_id', $activeYearId)
+                    ->where('student_id', $studentId)
+                    ->update(['attendance_number' => $number]);
+            }
+        });
+
+        ActivityLogger::log(null, 'updated', $schoolClass, "Update manual nomor absen kelas {$schoolClass->name}");
+
+        return redirect()->route('admin.classes.show', $schoolClass)->with('success', 'Nomor absen berhasil diperbarui.');
     }
 }

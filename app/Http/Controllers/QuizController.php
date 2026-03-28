@@ -321,7 +321,7 @@ class QuizController extends Controller
         // Get active academic year
         $activeAcademicYearId = \App\Models\AcademicYear::where('is_active', true)->value('id');
 
-        // Get all students enrolled in this class
+        // Get all students enrolled in this class (with pivot for sorting)
         $students = \App\Models\Student::whereHas('studentClasses', function ($q) use ($classId, $activeAcademicYearId) {
                 $q->where('class_id', $classId);
                 if ($activeAcademicYearId) {
@@ -330,9 +330,18 @@ class QuizController extends Controller
             })
             ->with(['user' => function ($q) {
                 $q->select('id', 'full_name');
+            }, 'studentClasses' => function($q) use ($classId, $activeAcademicYearId) {
+                $q->where('class_id', $classId);
+                if ($activeAcademicYearId) {
+                    $q->where('academic_year_id', $activeAcademicYearId);
+                }
             }])
-            ->orderBy('id')
-            ->get();
+            ->get()
+            ->sortBy(function($student) {
+                $sc = $student->studentClasses->first();
+                $num = $sc ? ($sc->attendance_number ?? 999) : 999;
+                return sprintf('%03d-%s', $num, $student->user->full_name);
+            });
 
         // Fetch all submitted attempts for this quiz (keyed by student_id, only best/latest)
         $attemptsByStudent = \App\Models\QuizAttempt::where('quiz_id', $quiz->id)

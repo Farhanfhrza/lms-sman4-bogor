@@ -56,6 +56,7 @@ class StudentQuizController extends Controller
 
         $breadcrumbs = [
             ['label' => $course->subject->name ?? 'Course', 'url' => route('courses.show', $course)],
+            ['label' => $quiz->section->title ?? 'Section', 'url' => route('courses.show', $course) . '#section-' . $quiz->section_id],
             ['label' => $quiz->title],
         ];
 

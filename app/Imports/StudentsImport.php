@@ -40,6 +40,15 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
             $nisn = trim((string) $nisn);
             $name = trim((string) $name);
 
+            $genderRaw = $row['jk'] ?? $row['jenis_kelamin'] ?? $row['gender'] ?? null;
+            $gender = null;
+            if ($genderRaw) {
+                $g = strtoupper(trim((string) $genderRaw));
+                if (in_array($g, ['L', 'P', 'LAKI-LAKI', 'PEREMPUAN', 'M', 'F'])) {
+                    $gender = in_array($g, ['L', 'LAKI-LAKI', 'M']) ? 'L' : 'P';
+                }
+            }
+
             // Skip if NISN already exists in students table (Student has no SoftDeletes)
             if (Student::where('nisn', $nisn)->exists()) {
                 $this->skippedCount++;
@@ -54,11 +63,12 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
 
             if ($existingUser) {
                 // Restore and reuse the soft-deleted user
-                DB::transaction(function () use ($existingUser, $name, $nisn, $email) {
+                DB::transaction(function () use ($existingUser, $name, $nisn, $email, $gender) {
                     $existingUser->restore();
                     $existingUser->update([
                         'full_name' => $name,
                         'email' => $email,
+                        'gender' => $gender,
                         'password' => Hash::make('Siswa' . $nisn),
                     ]);
 
@@ -83,11 +93,12 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
                 continue;
             }
 
-            DB::transaction(function () use ($name, $nisn, $email) {
+            DB::transaction(function () use ($name, $nisn, $email, $gender) {
                 $user = User::create([
                     'full_name'        => $name,
                     'login_identifier' => $nisn,
                     'email'            => $email,
+                    'gender'           => $gender,
                     'password'         => Hash::make('Siswa' . $nisn),
                 ]);
 

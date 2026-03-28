@@ -166,6 +166,7 @@ class AdminStudentController extends Controller
         $request->validate([
             'full_name'       => 'required|string|max:255',
             'email'           => 'nullable|email|max:255|unique:users,email,' . $student->user_id,
+            'gender'          => 'required|in:L,P',
             'nisn'            => 'required|string|max:20|unique:students,nisn,' . $student->id,
             'enrollment_year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
             'password'        => 'nullable|string|min:8',
@@ -177,6 +178,7 @@ class AdminStudentController extends Controller
                 'full_name'        => $request->full_name,
                 'login_identifier' => $request->nisn,
                 'email'            => $request->email,
+                'gender'           => $request->gender,
             ];
 
             if ($request->hasFile('profile_photo')) {

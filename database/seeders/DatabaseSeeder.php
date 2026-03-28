@@ -87,11 +87,13 @@ class DatabaseSeeder extends Seeder
         $students->chunk(ceil($students->count() / $classes->count()))->each(function ($chunk, $index) use ($classes, $academicYear) {
             if (isset($classes[$index])) {
                 $class = $classes[$index];
+                $attendanceNumber = 1;
                 foreach ($chunk as $studentUser) {
                     \App\Models\StudentClass::create([
-                        'student_id' => $studentUser->student->id,
-                        'class_id' => $class->id,
-                        'academic_year_id' => $academicYear->id,
+                        'student_id'        => $studentUser->student->id,
+                        'class_id'          => $class->id,
+                        'academic_year_id'  => $academicYear->id,
+                        'attendance_number' => $attendanceNumber++,
                     ]);
                 }
             }

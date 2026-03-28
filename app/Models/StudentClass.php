@@ -10,7 +10,7 @@ class StudentClass extends Model
     /** @use HasFactory<\Database\Factories\StudentClassFactory> */
     use HasFactory;
 
-    protected $fillable = ['student_id', 'class_id', 'academic_year_id'];
+    protected $fillable = ['student_id', 'class_id', 'academic_year_id', 'attendance_number'];
 
     public function student()
     {

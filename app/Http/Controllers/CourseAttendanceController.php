@@ -111,12 +111,16 @@ class CourseAttendanceController extends Controller
             abort(404);
         }
 
-        // Load attendances with student data
+        // Load attendances with student data and their pivot class data for sorting
         $attendances = $meeting->attendances()
-            ->with(['student.user'])
+            ->with(['student.user', 'student.studentClasses' => function($query) use ($course) {
+                $query->where('class_id', $course->class_id);
+            }])
             ->get()
             ->sortBy(function($attendance) {
-                return $attendance->student->user->full_name;
+                $sc = $attendance->student->studentClasses->first();
+                $num = $sc ? ($sc->attendance_number ?? 999) : 999;
+                return sprintf('%03d-%s', $num, $attendance->student->user->full_name);
             });
 
         return view('teacher.attendances.show-meeting', compact('course', 'meeting', 'attendances'));
@@ -195,9 +199,17 @@ class CourseAttendanceController extends Controller
             ];
         }
 
-        // Sort matrix by student name alphabetically
-        uasort($matrix, function($a, $b) {
-            return strcasecmp($a['student']->user->full_name, $b['student']->user->full_name);
+        // Sort matrix by attendance number, then by student name alphabetically
+        uasort($matrix, function($a, $b) use ($course) {
+            $scA = $a['student']->studentClasses->firstWhere('class_id', $course->class_id);
+            $scB = $b['student']->studentClasses->firstWhere('class_id', $course->class_id);
+            $numA = $scA ? ($scA->attendance_number ?? 999) : 999;
+            $numB = $scB ? ($scB->attendance_number ?? 999) : 999;
+
+            if ($numA === $numB) {
+                return strcasecmp($a['student']->user->full_name, $b['student']->user->full_name);
+            }
+            return $numA <=> $numB;
         });
 
         return view('teacher.attendances.recap', compact('course', 'meetings', 'matrix'));

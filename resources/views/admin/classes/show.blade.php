@@ -79,41 +79,76 @@
         </div>
 
         {{-- Tab Content: Daftar Siswa --}}
-        <div x-show="currentTab === 'overview'" class="bg-white shadow-sm rounded-lg border border-gray-200 p-6" style="display: none;" x-cloak>
-            <div class="flex justify-between items-center mb-4">
+        <div x-show="currentTab === 'overview'" class="bg-white shadow-sm rounded-lg border border-gray-200 p-6" style="display: none;" x-cloak x-data="{ editMode: false }">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <h3 class="text-lg font-bold text-gray-800">Siswa yang Terdaftar di Kelas {{ $schoolClass->name }}</h3>
-                <button @click="showEnrollModal = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                    Setup Siswa
-                </button>
+                <div class="flex items-center gap-2">
+                    <form action="{{ route('admin.classes.generate-attendance-numbers', $schoolClass) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin men-generate ulang nomor absen secara otomatis berdasarkan abjad? Ini akan menimpa nomor urut sebelumnya.')">
+                        @csrf
+                        <button type="submit" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-300 flex items-center">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Generate Otomatis
+                        </button>
+                    </form>
+                    <button @click="editMode = !editMode" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        <span x-text="editMode ? 'Batal Edit' : 'Edit Nomor'"></span>
+                    </button>
+                    <button @click="showEnrollModal = true" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        Setup Siswa
+                    </button>
+                </div>
             </div>
             
-            <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                <table class="w-full text-sm text-left align-middle">
-                    <thead class="bg-gray-50 text-gray-700 font-bold uppercase border-b border-gray-200">
-                        <tr>
-                            <th class="w-12 px-6 py-3 text-center">No</th>
-                            <th class="px-6 py-3">NISN</th>
-                            <th class="px-6 py-3">Nama Lengkap</th>
-                            <th class="px-6 py-3">Jenis Kelamin</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($schoolClass->studentClasses as $index => $sc)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-3 text-center text-gray-500 font-medium">{{ $index + 1 }}</td>
-                                <td class="px-6 py-3 font-mono text-gray-600">{{ $sc->student->nisn }}</td>
-                                <td class="px-6 py-3 font-semibold text-gray-900">{{ $sc->student->user->full_name ?? $sc->student->user->name }}</td>
-                                <td class="px-6 py-3">{{ $sc->student->user->gender == 'L' ? 'Laki-laki' : ($sc->student->user->gender == 'P' ? 'Perempuan' : '-') }}</td>
-                            </tr>
-                        @empty
+            <form action="{{ route('admin.classes.update-attendance-numbers', $schoolClass) }}" method="POST" id="formAttendanceNumbers">
+                @csrf
+                @method('PUT')
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="w-full text-sm text-left align-middle">
+                        <thead class="bg-gray-50 text-gray-700 font-bold uppercase border-b border-gray-200">
                             <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-gray-400">Belum ada siswa di kelas ini. Klik "Setup Siswa" untuk menambahkan.</td>
+                                <th class="w-24 px-6 py-3 text-center">No Absen</th>
+                                <th class="px-6 py-3">NISN</th>
+                                <th class="px-6 py-3">Nama Lengkap</th>
+                                <th class="px-6 py-3">Jenis Kelamin</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @php
+                                $sortedStudents = $schoolClass->studentClasses->sortBy([
+                                    ['attendance_number', 'asc'],
+                                    ['student.user.full_name', 'asc'],
+                                ]);
+                            @endphp
+                            @forelse($sortedStudents as $sc)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-3 text-center font-medium">
+                                        <div x-show="!editMode" class="text-[#1a6341] font-bold text-base">{{ $sc->attendance_number ?? '-' }}</div>
+                                        <div x-show="editMode" style="display: none;">
+                                            <input type="number" name="attendance_numbers[{{ $sc->student_id }}]" value="{{ $sc->attendance_number }}" min="1" class="w-16 text-center border-gray-300 rounded-md focus:ring-[#1a6341] py-1 text-sm bg-yellow-50 font-bold">
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-3 font-mono text-gray-600">{{ $sc->student->nisn }}</td>
+                                    <td class="px-6 py-3 font-semibold text-gray-900">{{ $sc->student->user->full_name ?? $sc->student->user->name }}</td>
+                                    <td class="px-6 py-3">{{ $sc->student->user->gender == 'L' ? 'Laki-laki' : ($sc->student->user->gender == 'P' ? 'Perempuan' : '-') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-8 text-center text-gray-400">Belum ada siswa di kelas ini. Klik "Setup Siswa" untuk menambahkan.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 flex justify-end" x-show="editMode" style="display: none;">
+                    <button type="submit" class="bg-[#1a6341] hover:bg-[#145232] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm flex items-center transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
         </div>
 
         {{-- Tab Content: Jadwal Pelajaran --}}

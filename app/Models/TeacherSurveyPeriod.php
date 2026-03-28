@@ -25,4 +25,9 @@ class TeacherSurveyPeriod extends Model
     {
         return $this->belongsTo(AcademicYear::class);
     }
+
+    public function responses()
+    {
+        return $this->hasMany(TeacherSurveyResponse::class, 'period_id');
+    }
 }

@@ -54,7 +54,7 @@ class MaterialController extends Controller
         $classSubject = $material->section->classSubject;
         $breadcrumbs = [
             ['label' => $classSubject->subject->name ?? 'Course', 'url' => route('courses.show', $classSubject)],
-            ['label' => $material->section->title ?? 'Section'],
+            ['label' => $material->section->title ?? 'Section', 'url' => route('courses.show', $classSubject) . '#section-' . $material->section_id],
             ['label' => $material->title ?? 'Material'],
         ];
 
