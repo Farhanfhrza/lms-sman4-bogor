@@ -1,3 +1,20 @@
+@php
+    $sliderPath = public_path('images/slider');
+    $sliderImages = [];
+    if (\Illuminate\Support\Facades\File::exists($sliderPath)) {
+        $files = \Illuminate\Support\Facades\File::files($sliderPath);
+        foreach ($files as $file) {
+            if (in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                $sliderImages[] = asset('images/slider/' . $file->getFilename());
+            }
+        }
+    }
+    
+    // Fallback if no images found
+    if (empty($sliderImages)) {
+        $sliderImages[] = asset('images/backgrounds/school_building.png');
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -15,7 +32,7 @@
 
     <!-- Mobile Background Wrapper (visible only on mobile/tablet) -->
     <div class="fixed inset-0 z-[-1] lg:hidden bg-cover bg-center" 
-         style="background-image: url('{{ asset('images/backgrounds/school_building.png') }}');">
+         style="background-image: url('{{ $sliderImages[0] }}');">
     </div>
 
     <!-- Main Content Wrapper -->
@@ -133,15 +150,10 @@
     <div class="hidden lg:block lg:w-1/2 relative bg-gray-100 overflow-hidden" id="desktop-slider">
         <!-- Slider Images Container -->
         <div id="slider-images" class="absolute inset-0 w-full h-full">
-            <!-- Slide 1 -->
-            <div class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100 slide-image" 
-                 style="background-image: url('{{ asset('images/backgrounds/school_building.png') }}');"></div>
-             <!-- Slide 2 (Placeholder, can be same or different) -->
-            <div class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-0 slide-image" 
-                 style="background-image: url('{{ asset('images/backgrounds/school_building.png') }}');"></div>
-             <!-- Slide 3 (Placeholder) -->
-             <div class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-0 slide-image" 
-                 style="background-image: url('{{ asset('images/backgrounds/school_building.png') }}');"></div>
+            @foreach($sliderImages as $index => $image)
+            <div class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 slide-image {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}" 
+                 style="background-image: url('{{ $image }}');"></div>
+            @endforeach
         </div>
 
         <!-- Detail Overlay: Fade to White at Top & Bottom -->
@@ -149,11 +161,13 @@
         <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white via-white/40 to-transparent z-10"></div>
 
         <!-- Slider Indicators -->
+        @if(count($sliderImages) > 1)
         <div class="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex items-center space-x-3 z-30">
-            <button onclick="goToSlide(0)" class="slider-dot w-3 h-3 rounded-full bg-[#1a6341] transition-all duration-300 hover:scale-110" aria-label="Slide 1"></button>
-            <button onclick="goToSlide(1)" class="slider-dot w-3 h-3 rounded-full border-2 border-[#1a6341] bg-transparent hover:bg-[#1a6341]/20 transition-all duration-300" aria-label="Slide 2"></button>
-            <button onclick="goToSlide(2)" class="slider-dot w-3 h-3 rounded-full border-2 border-[#1a6341] bg-transparent hover:bg-[#1a6341]/20 transition-all duration-300" aria-label="Slide 3"></button>
+            @foreach($sliderImages as $index => $image)
+            <button onclick="goToSlide({{ $index }})" class="slider-dot w-3 h-3 rounded-full transition-all duration-300 {{ $index === 0 ? 'bg-[#1a6341] hover:scale-110' : 'border-2 border-[#1a6341] bg-transparent hover:bg-[#1a6341]/20' }}" aria-label="Slide {{ $index + 1 }}"></button>
+            @endforeach
         </div>
+        @endif
     </div>
 
     <!-- Slider JS -->

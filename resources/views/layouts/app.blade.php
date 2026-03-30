@@ -217,6 +217,16 @@
                             Log Aktivitas Sistem
                         </div>
                     </a>
+
+                    <div class="px-4 py-2 mt-2 text-xs font-semibold text-green-200 uppercase tracking-wider">
+                        Tampilan & Visual
+                    </div>
+                    <a href="{{ route('admin.slider.index') }}" class="block px-4 py-3 {{ request()->routeIs('admin.slider.*') ? 'bg-white text-[#1a6341] font-bold' : 'hover:bg-[#238054]' }}">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Slider Halaman Login
+                        </div>
+                    </a>
                     @endif
                 </nav>
             </div>
@@ -380,6 +390,19 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                     </svg>
                     <span class="font-medium">Log Aktivitas Sistem</span>
+                </a>
+
+                <!-- Group: TAMPILAN & VISUAL -->
+                <div class="px-3 mb-2 mt-6 text-xs font-semibold text-green-200 uppercase tracking-wider">
+                    Tampilan & Visual
+                </div>
+                <a href="{{ route('admin.slider.index') }}" 
+                   class="flex items-center px-4 py-3 rounded-lg transition-colors group
+                          {{ request()->routeIs('admin.slider.*') ? 'bg-white text-[#1a6341] font-bold shadow-sm' : 'text-white hover:bg-[#238054]' }}">
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.slider.*') ? 'text-[#1a6341]' : 'text-green-100' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="font-medium">Slider Halaman Login</span>
                 </a>
                 @endif
             </nav>

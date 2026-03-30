@@ -16,6 +16,7 @@ use App\Http\Controllers\StudentQuizController;
 use App\Http\Controllers\CourseAttendanceController;
 use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\AdminSliderController;
 use Illuminate\Support\Facades\Route;
 
 // Root route (/) - Login page for guests, redirect to dashboard if authenticated
@@ -162,6 +163,11 @@ Route::middleware(['auth', 'check.email'])->group(function () {
         Route::post('surveys/{survey}/questions', [App\Http\Controllers\AdminSurveyController::class, 'storeQuestion'])->name('surveys.questions.store');
         Route::put('surveys/questions/{question}', [App\Http\Controllers\AdminSurveyController::class, 'updateQuestion'])->name('surveys.questions.update');
         Route::delete('surveys/questions/{question}', [App\Http\Controllers\AdminSurveyController::class, 'destroyQuestion'])->name('surveys.questions.destroy');
+
+        // Login Page Slider Management
+        Route::get('/slider', [AdminSliderController::class, 'index'])->name('slider.index');
+        Route::post('/slider', [AdminSliderController::class, 'store'])->name('slider.store');
+        Route::delete('/slider/{slider}', [AdminSliderController::class, 'destroy'])->name('slider.destroy');
     });
 
     // --- Teacher Course Management ---

@@ -62,70 +62,80 @@
             @method('PUT')
             
             <div class="bg-white shadow-md rounded-xl overflow-hidden border border-gray-200 mb-6">
-                <!-- Wrapper for responsive scrolling on very small screens, though we want it inline -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50 border-b border-gray-200">
+                <!-- Remove overflow-x-auto to allow flex wrap if needed, or keep it but container styling handles mobile -->
+                <div class="w-full">
+                    <table class="min-w-full divide-y md:divide-gray-200 w-full block md:table">
+                        <thead class="bg-gray-50 border-b border-gray-200 hidden md:table-header-group">
                             <tr>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-16 border-r border-gray-200">No</th>
                                 <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-64 border-r border-gray-200">Siswa</th>
                                 <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider border-r border-gray-200">Keterangan</th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-64">Catatan (Optional)</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Catatan (Optional)</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-gray-50 md:bg-white divide-y-0 md:divide-y md:divide-gray-200 flex flex-col md:table-row-group space-y-4 md:space-y-0 p-4 md:p-0">
                             @forelse($attendances as $attendance)
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 border-r border-gray-200 text-sm text-gray-500 font-medium">
+                            <tr class="bg-white rounded-xl shadow-sm md:shadow-none border border-gray-200 md:border-none p-5 md:p-0 flex flex-col md:table-row hover:bg-gray-50 transition-colors w-full">
+                                <td class="px-0 py-0 md:px-6 md:py-4 md:border-r border-gray-200 text-sm text-gray-500 font-medium hidden md:table-cell">
                                     {{ $loop->iteration }}
                                 </td>
-                                <td class="px-6 py-4 border-r border-gray-200">
+                                
+                                <td class="px-0 py-0 md:px-6 md:py-4 md:border-r border-gray-200 block md:table-cell mb-4 md:mb-0">
+                                    <div class="md:hidden text-xs font-semibold text-gray-400 mb-3 uppercase tracking-wider border-b border-gray-100 pb-2">
+                                        Siswa #{{ $loop->iteration }}
+                                    </div>
                                     <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 relative">
-                                            <img class="h-10 w-10 rounded-full object-cover border border-gray-200 shadow-sm" src="https://ui-avatars.com/api/?name={{ urlencode($attendance->student->user->full_name) }}&background=1a6341&color=fff" alt="">
+                                        <div class="flex-shrink-0 h-10 w-10 sm:h-12 sm:w-12 relative">
+                                            <img class="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover border md:border border-gray-200 shadow-sm" src="https://ui-avatars.com/api/?name={{ urlencode($attendance->student->user->full_name) }}&background=1a6341&color=fff" alt="">
                                         </div>
                                         <div class="ml-4">
-                                            <div class="text-sm font-bold text-gray-900">{{ $attendance->student->user->full_name }}</div>
-                                            <div class="text-xs text-gray-500 font-medium mt-0.5">NISN: {{ $attendance->student->nisn }}</div>
+                                            <div class="text-sm md:text-sm sm:text-base font-bold text-gray-900">{{ $attendance->student->user->full_name }}</div>
+                                            <div class="text-xs sm:text-sm text-gray-500 font-medium mt-0.5">NISN: {{ $attendance->student->nisn }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 
-                                <td class="px-6 py-4 border-r border-gray-200 text-center">
-                                    <div class="flex items-center justify-center space-x-6 md:space-x-8">
+                                <td class="px-0 py-0 md:px-6 md:py-4 md:border-r border-gray-200 text-center block md:table-cell mb-4 md:mb-0">
+                                    <div class="md:hidden text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider text-left">
+                                        Status Kehadiran
+                                    </div>
+                                    <div class="flex items-center justify-between md:justify-center md:space-x-8 bg-gray-50 md:bg-transparent p-3 md:p-0 rounded-lg md:rounded-none border border-gray-200 md:border-none w-full shadow-inner md:shadow-none">
                                         <!-- Hadir -->
-                                        <label class="inline-flex items-center cursor-pointer group">
-                                            <input type="radio" name="attendances[{{ $attendance->id }}][status]" value="Hadir" {{ $attendance->status == 'Hadir' ? 'checked' : '' }} class="form-radio h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300">
-                                            <span class="ml-2 text-sm font-medium text-gray-700 group-hover:text-green-700 transition-colors">Hadir</span>
+                                        <label class="flex flex-col md:flex-row items-center cursor-pointer group gap-1.5 md:gap-0">
+                                            <input type="radio" name="attendances[{{ $attendance->id }}][status]" value="Hadir" {{ $attendance->status == 'Hadir' ? 'checked' : '' }} class="form-radio h-6 w-6 md:h-5 md:w-5 text-green-600 focus:ring-green-500 border-gray-300">
+                                            <span class="md:ml-2 text-[11px] md:text-sm font-bold md:font-medium text-gray-700 group-hover:text-green-700 transition-colors uppercase md:capitalize tracking-wider md:tracking-normal">Hadir</span>
                                         </label>
                                         
                                         <!-- Sakit -->
-                                        <label class="inline-flex items-center cursor-pointer group">
-                                            <input type="radio" name="attendances[{{ $attendance->id }}][status]" value="Sakit" {{ $attendance->status == 'Sakit' ? 'checked' : '' }} class="form-radio h-5 w-5 text-red-500 focus:ring-red-500 border-gray-300">
-                                            <span class="ml-2 text-sm font-medium text-gray-700 group-hover:text-red-700 transition-colors">Sakit</span>
+                                        <label class="flex flex-col md:flex-row items-center cursor-pointer group gap-1.5 md:gap-0">
+                                            <input type="radio" name="attendances[{{ $attendance->id }}][status]" value="Sakit" {{ $attendance->status == 'Sakit' ? 'checked' : '' }} class="form-radio h-6 w-6 md:h-5 md:w-5 text-red-500 focus:ring-red-500 border-gray-300">
+                                            <span class="md:ml-2 text-[11px] md:text-sm font-bold md:font-medium text-gray-700 group-hover:text-red-700 transition-colors uppercase md:capitalize tracking-wider md:tracking-normal">Sakit</span>
                                         </label>
                                         
                                         <!-- Alpha -->
-                                        <label class="inline-flex items-center cursor-pointer group">
-                                            <input type="radio" name="attendances[{{ $attendance->id }}][status]" value="Alpha" {{ $attendance->status == 'Alpha' ? 'checked' : '' }} class="form-radio h-5 w-5 text-gray-600 focus:ring-gray-500 border-gray-300">
-                                            <span class="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">Alpha</span>
+                                        <label class="flex flex-col md:flex-row items-center cursor-pointer group gap-1.5 md:gap-0">
+                                            <input type="radio" name="attendances[{{ $attendance->id }}][status]" value="Alpha" {{ $attendance->status == 'Alpha' ? 'checked' : '' }} class="form-radio h-6 w-6 md:h-5 md:w-5 text-gray-600 focus:ring-gray-500 border-gray-300">
+                                            <span class="md:ml-2 text-[11px] md:text-sm font-bold md:font-medium text-gray-700 group-hover:text-gray-900 transition-colors uppercase md:capitalize tracking-wider md:tracking-normal">Alpha</span>
                                         </label>
                                         
                                         <!-- Izin/Lainnya -->
-                                        <label class="inline-flex items-center cursor-pointer group">
-                                            <input type="radio" name="attendances[{{ $attendance->id }}][status]" value="Izin" {{ $attendance->status == 'Izin' ? 'checked' : '' }} class="form-radio h-5 w-5 text-orange-500 focus:ring-orange-500 border-gray-300">
-                                            <span class="ml-2 text-sm font-medium text-gray-700 group-hover:text-orange-700 transition-colors">Lainnya</span>
+                                        <label class="flex flex-col md:flex-row items-center cursor-pointer group gap-1.5 md:gap-0">
+                                            <input type="radio" name="attendances[{{ $attendance->id }}][status]" value="Izin" {{ $attendance->status == 'Izin' ? 'checked' : '' }} class="form-radio h-6 w-6 md:h-5 md:w-5 text-orange-500 focus:ring-orange-500 border-gray-300">
+                                            <span class="md:ml-2 text-[11px] md:text-sm font-bold md:font-medium text-gray-700 group-hover:text-orange-700 transition-colors uppercase md:capitalize tracking-wider md:tracking-normal">Izin</span>
                                         </label>
                                     </div>
                                 </td>
                                 
-                                <td class="px-6 py-4">
-                                    <input type="text" name="attendances[{{ $attendance->id }}][note]" value="{{ $attendance->note }}" placeholder="Tambah catatan..." class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-[#1a6341] focus:border-[#1a6341] sm:text-sm bg-gray-50 py-2 transition-colors">
+                                <td class="px-0 py-0 md:px-6 md:py-4 block md:table-cell">
+                                    <div class="md:hidden text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider text-left">
+                                        Catatan Pendidik
+                                    </div>
+                                    <input type="text" name="attendances[{{ $attendance->id }}][note]" value="{{ $attendance->note }}" placeholder="Tambah catatan (opsional)..." class="block w-full border-gray-300 rounded-lg md:rounded-md shadow-sm focus:ring-[#1a6341] focus:border-[#1a6341] sm:text-sm md:bg-gray-50 py-3 md:py-2 transition-colors">
                                 </td>
                             </tr>
                             @empty
-                            <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                            <tr class="block md:table-row">
+                                <td colspan="4" class="px-6 py-12 text-center text-gray-500 block md:table-cell w-full">
                                     Tidak ada data siswa dalam kelas ini.
                                 </td>
                             </tr>
