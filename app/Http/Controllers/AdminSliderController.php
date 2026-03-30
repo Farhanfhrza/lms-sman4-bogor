@@ -73,8 +73,9 @@ class AdminSliderController extends Controller
     /**
      * Remove the specified image from storage.
      */
-    public function destroy($filename)
+    public function destroy(Request $request)
     {
+        $filename = $request->input('filename');
         $filePath = $this->sliderPath . DIRECTORY_SEPARATOR . $filename;
 
         // Prevent directory traversal attacks

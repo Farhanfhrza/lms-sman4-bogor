@@ -167,7 +167,7 @@ Route::middleware(['auth', 'check.email'])->group(function () {
         // Login Page Slider Management
         Route::get('/slider', [AdminSliderController::class, 'index'])->name('slider.index');
         Route::post('/slider', [AdminSliderController::class, 'store'])->name('slider.store');
-        Route::delete('/slider/{slider}', [AdminSliderController::class, 'destroy'])->name('slider.destroy');
+        Route::delete('/slider/destroy', [AdminSliderController::class, 'destroy'])->name('slider.destroy');
     });
 
     // --- Teacher Course Management ---
