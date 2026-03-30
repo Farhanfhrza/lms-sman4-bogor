@@ -115,10 +115,8 @@ class DatabaseSeeder extends Seeder
                 // Assign a random teacher to this subject in this class
                 $teacherUser = $teachers->random();
 
-                // Ensure teacher is assigned to this master subject
-                if (!$subject->teachers->contains($teacherUser->teacher->id)) {
-                    $subject->teachers()->attach($teacherUser->teacher->id);
-                }
+                // Ensure teacher is assigned to this master subject (no duplicates)
+                $subject->teachers()->syncWithoutDetaching([$teacherUser->teacher->id]);
                 
                 $cs = \App\Models\ClassSubject::create([
                     'subject_id' => $subject->id,
