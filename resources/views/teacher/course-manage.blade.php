@@ -2,8 +2,18 @@
     <div class="py-6">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- Breadcrumbs --}}
-            <x-breadcrumb :items="$breadcrumbs" />
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                {{-- Breadcrumbs --}}
+                <x-breadcrumb :items="$breadcrumbs" />
+
+                {{-- Import Button --}}
+                @if($otherCourses->count() > 0)
+                <button @click="$dispatch('open-modal', 'import-modal')" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 hover:text-[#1a6341] transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a6341]">
+                    <svg class="w-5 h-5 mr-2 text-gray-400 group-hover:text-[#1a6341]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Import dari Kelas Lain
+                </button>
+                @endif
+            </div>
 
             {{-- Course Header Banner --}}
             <div class="relative bg-[#1a6341] rounded-xl overflow-hidden p-6 mb-8 shadow-lg min-h-[140px] flex flex-col justify-end">
@@ -22,6 +32,14 @@
                     <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     <span>{{ session('success') }}</span>
                     <button @click="show = false" class="ml-auto text-green-500 hover:text-green-700">&times;</button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center" x-data="{ show: true }" x-show="show">
+                    <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>{{ session('error') }}</span>
+                    <button @click="show = false" class="ml-auto text-red-500 hover:text-red-700">&times;</button>
                 </div>
             @endif
 
@@ -358,6 +376,173 @@
 
         </div>
     </div>
+
+    {{-- Import Modal --}}
+    <x-modal name="import-modal" focusable>
+        <div class="p-6" x-data="{
+            sourceCourseId: '',
+            isLoading: false,
+            treeData: [],
+            error: null,
+            expandedSections: {},
+            selectAll: false,
+            selectedItems: {
+                sections: [],
+                materials: [],
+                assignments: [],
+                quizzes: []
+            },
+
+            async fetchTree() {
+                if (!this.sourceCourseId) {
+                    this.treeData = [];
+                    return;
+                }
+                this.isLoading = true;
+                this.error = null;
+                try {
+                    const response = await fetch(`{{ route('manage.courses.import.tree', $course) }}?source_course_id=${this.sourceCourseId}`);
+                    if (!response.ok) throw new Error('Gagal memuat data kelas.');
+                    const data = await response.json();
+                    this.treeData = data.sections;
+                    // Initialize expanded state
+                    this.treeData.forEach(sec => this.expandedSections[sec.id] = true);
+                } catch (e) {
+                    this.error = e.message;
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            toggleSection(secId) {
+                const sec = this.treeData.find(s => s.id === secId);
+                const isNowSelected = this.selectedItems.sections.includes(secId);
+                
+                if (!isNowSelected) {
+                    // Remove all its children
+                    sec.materials.forEach(m => {
+                        this.selectedItems.materials = this.selectedItems.materials.filter(id => id !== m.id);
+                    });
+                    sec.assignments.forEach(a => {
+                        this.selectedItems.assignments = this.selectedItems.assignments.filter(id => id !== a.id);
+                    });
+                    sec.quizzes.forEach(q => {
+                        this.selectedItems.quizzes = this.selectedItems.quizzes.filter(id => id !== q.id);
+                    });
+                } else {
+                    // Add all its children
+                    sec.materials.forEach(m => {
+                        if(!this.selectedItems.materials.includes(m.id)) this.selectedItems.materials.push(m.id);
+                    });
+                    sec.assignments.forEach(a => {
+                        if(!this.selectedItems.assignments.includes(a.id)) this.selectedItems.assignments.push(a.id);
+                    });
+                    sec.quizzes.forEach(q => {
+                        if(!this.selectedItems.quizzes.includes(q.id)) this.selectedItems.quizzes.push(q.id);
+                    });
+                }
+            },
+
+            checkSectionParent(secId) {
+                const sec = this.treeData.find(s => s.id === secId);
+                const hasMaterials = sec.materials.some(m => this.selectedItems.materials.includes(m.id));
+                const hasAssignments = sec.assignments.some(a => this.selectedItems.assignments.includes(a.id));
+                const hasQuizzes = sec.quizzes.some(q => this.selectedItems.quizzes.includes(q.id));
+
+                if (hasMaterials || hasAssignments || hasQuizzes) {
+                    if (!this.selectedItems.sections.includes(secId)) {
+                        this.selectedItems.sections.push(secId);
+                    }
+                }
+            }
+        }">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Import Konten dari Kelas Lain</h2>
+            <p class="text-sm text-gray-600 mb-6">Pilih kelas sumber untuk melihat daftar Topik dan kontennya. Anda dapat menyalin bab keseluruhan atau memilih item tertentu. Semua salinan akan dimasukkan sebagai <span class="font-bold text-orange-600">Draf</span>.</p>
+
+            <form action="{{ route('manage.courses.import.store', $course) }}" method="POST">
+                @csrf
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Kelas Sumber <span class="text-xs text-gray-500 font-normal">(Mata Pelajaran yang sama)</span></label>
+                    <select name="source_course_id" x-model="sourceCourseId" @change="fetchTree" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#1a6341]" required>
+                        <option value="">-- Pilih Kelas --</option>
+                        @foreach($otherCourses as $other)
+                            <option value="{{ $other->id }}">{{ $other->schoolClass->name }} - {{ $other->academicYear?->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Loading State --}}
+                <div x-show="isLoading" class="text-center py-8">
+                    <svg class="animate-spin h-8 w-8 text-[#1a6341] mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p class="mt-2 text-sm text-gray-500">Memuat struktur kelas...</p>
+                </div>
+
+                {{-- Error State --}}
+                <div x-show="error" class="bg-red-50 text-red-700 p-4 rounded-lg text-sm mb-4" x-text="error"></div>
+
+                {{-- Tree View --}}
+                <div x-show="!isLoading && treeData.length > 0" class="border border-gray-300 rounded-lg max-h-80 overflow-y-auto bg-gray-50 p-4 mb-6 shadow-inner" style="display: none;">
+                    <template x-for="section in treeData" :key="section.id">
+                        <div class="mb-4 bg-white border border-gray-200 shadow-sm rounded-lg p-3">
+                            {{-- Section Header --}}
+                            <div class="flex items-center justify-between">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" name="sections[]" :value="section.id" x-model="selectedItems.sections" @change="toggleSection(section.id)" class="rounded w-4 h-4 text-[#1a6341] focus:ring-[#1a6341]">
+                                    <span class="ml-2 font-bold text-gray-800" x-text="section.title"></span>
+                                </label>
+                                <button type="button" @click="expandedSections[section.id] = !expandedSections[section.id]" class="text-gray-400 hover:text-gray-600">
+                                    <svg class="w-5 h-5 transform transition-transform" :class="expandedSections[section.id] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                            </div>
+
+                            {{-- Section Items --}}
+                            <div x-show="expandedSections[section.id]" x-collapse class="mt-3 ml-6 space-y-2 border-l-2 border-gray-100 pl-4">
+                                {{-- Materials --}}
+                                <template x-for="item in section.materials" :key="'m'+item.id">
+                                    <label class="flex items-center text-sm cursor-pointer hover:bg-gray-50 p-1.5 rounded">
+                                        <input type="checkbox" name="materials[]" :value="item.id" x-model="selectedItems.materials" @change="checkSectionParent(section.id)" class="rounded text-[#1a6341] focus:ring-[#1a6341]">
+                                        <svg class="w-4 h-4 ml-3 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                        <span class="text-gray-700 font-medium" x-text="item.title"></span>
+                                    </label>
+                                </template>
+
+                                {{-- Assignments --}}
+                                <template x-for="item in section.assignments" :key="'a'+item.id">
+                                    <label class="flex items-center text-sm cursor-pointer hover:bg-gray-50 p-1.5 rounded">
+                                        <input type="checkbox" name="assignments[]" :value="item.id" x-model="selectedItems.assignments" @change="checkSectionParent(section.id)" class="rounded text-[#1a6341] focus:ring-[#1a6341]">
+                                        <svg class="w-4 h-4 ml-3 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                        <span class="text-gray-700 font-medium" x-text="item.title"></span>
+                                    </label>
+                                </template>
+
+                                {{-- Quizzes --}}
+                                <template x-for="item in section.quizzes" :key="'q'+item.id">
+                                    <label class="flex items-center text-sm cursor-pointer hover:bg-gray-50 p-1.5 rounded">
+                                        <input type="checkbox" name="quizzes[]" :value="item.id" x-model="selectedItems.quizzes" @change="checkSectionParent(section.id)" class="rounded text-[#1a6341] focus:ring-[#1a6341]">
+                                        <svg class="w-4 h-4 ml-3 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        <span class="text-gray-700 font-medium" x-text="item.title"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="!isLoading && treeData.length === 0 && sourceCourseId" class="text-center py-4 text-sm text-gray-500 border border-dashed border-gray-300 rounded-lg">
+                    Kelas sumber tidak memiliki Topik atau konten apapun.
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" x-on:click="$dispatch('close')" class="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 focus:ring-2 focus:ring-gray-300">Batal</button>
+                    <button type="submit" :disabled="!sourceCourseId || selectedItems.sections.length === 0" :class="{'opacity-50 cursor-not-allowed': !sourceCourseId || selectedItems.sections.length === 0}" class="px-5 py-2.5 bg-[#1a6341] text-white rounded-lg text-sm font-bold hover:bg-[#145232] shadow-sm flex items-center gap-2 focus:ring-2 focus:ring-[#1a6341] focus:ring-offset-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        Import Fitur Terpilih
+                    </button>
+                </div>
+            </form>
+        </div>
+    </x-modal>
     @push('styles')
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <style>

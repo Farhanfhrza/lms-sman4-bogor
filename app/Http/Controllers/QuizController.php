@@ -400,4 +400,38 @@ class QuizController extends Controller
 
         return view('teacher.quiz-grading', compact('course', 'quiz', 'rows', 'breadcrumbs', 'totalQuestions'));
     }
+
+    /**
+     * Reset a student's quiz attempt so they can retake it.
+     */
+    public function resetAttempt(Request $request, ClassSubject $course, Quiz $quiz)
+    {
+        $this->authorize('update', $course);
+
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+        ]);
+
+        $studentId = $request->input('student_id');
+
+        // Delete all attempts (and their answers via cascade) for this student on this quiz
+        $attempts = \App\Models\QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_id', $studentId)
+            ->get();
+
+        foreach ($attempts as $attempt) {
+            // Delete answers first
+            $attempt->answers()->delete();
+            $attempt->delete();
+        }
+
+        // Also clear any quiz progress record
+        \App\Models\QuizProgress::where('quiz_id', $quiz->id)
+            ->where('student_id', $studentId)
+            ->delete();
+
+        $studentName = \App\Models\Student::with('user')->find($studentId)?->user?->full_name ?? 'Siswa';
+
+        return redirect()->back()->with('success', "Percobaan kuis untuk {$studentName} berhasil direset. Siswa dapat mengerjakan ulang kuis ini.");
+    }
 }

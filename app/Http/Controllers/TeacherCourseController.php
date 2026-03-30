@@ -51,7 +51,19 @@ class TeacherCourseController extends Controller
             ['label' => $course->subject->name ?? 'Course'],
         ];
 
-        return view('teacher.course-manage', compact('course', 'breadcrumbs'));
+        // Fetch other classes for the same subject
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $otherCoursesQuery = ClassSubject::with('schoolClass')
+            ->where('subject_id', $course->subject_id)
+            ->where('id', '!=', $course->id);
+            
+        if (!$user->hasRole('admin') && $user->teacher) {
+            $otherCoursesQuery->where('teacher_id', $user->teacher->id);
+        }
+        
+        $otherCourses = $otherCoursesQuery->get();
+
+        return view('teacher.course-manage', compact('course', 'breadcrumbs', 'otherCourses'));
     }
 
     /**
@@ -71,7 +83,7 @@ class TeacherCourseController extends Controller
         ]);
 
         if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store('subjects', 'public');
+            $path = $request->file('cover_image')->store('subjects', env('UPLOAD_DISK', 'public'));
             if ($course->subject->cover_image_path && Storage::disk('public')->exists($course->subject->cover_image_path)) {
                 Storage::disk('public')->delete($course->subject->cover_image_path);
             }

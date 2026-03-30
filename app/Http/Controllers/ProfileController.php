@@ -37,7 +37,7 @@ class ProfileController extends Controller
             if ($user->profile_photo_path) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo_path);
             }
-            $user->profile_photo_path = $request->file('profile_photo')->store('profiles', 'public');
+            $user->profile_photo_path = $request->file('profile_photo')->store('profiles', env('UPLOAD_DISK', 'public'));
         }
 
         $user->save();

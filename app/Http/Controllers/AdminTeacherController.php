@@ -74,7 +74,7 @@ class AdminTeacherController extends Controller
         DB::transaction(function () use ($request) {
             $photoPath = null;
             if ($request->hasFile('profile_photo')) {
-                $photoPath = $request->file('profile_photo')->store('profiles', 'public');
+                $photoPath = $request->file('profile_photo')->store('profiles', env('UPLOAD_DISK', 'public'));
             }
 
             $user = User::create([
@@ -149,7 +149,7 @@ class AdminTeacherController extends Controller
                 if ($teacher->user->profile_photo_path) {
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($teacher->user->profile_photo_path);
                 }
-                $userData['profile_photo_path'] = $request->file('profile_photo')->store('profiles', 'public');
+                $userData['profile_photo_path'] = $request->file('profile_photo')->store('profiles', env('UPLOAD_DISK', 'public'));
             }
 
             if ($request->filled('password')) {

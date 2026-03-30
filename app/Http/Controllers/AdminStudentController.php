@@ -94,7 +94,7 @@ class AdminStudentController extends Controller
         DB::transaction(function () use ($request) {
             $photoPath = null;
             if ($request->hasFile('profile_photo')) {
-                $photoPath = $request->file('profile_photo')->store('profiles', 'public');
+                $photoPath = $request->file('profile_photo')->store('profiles', env('UPLOAD_DISK', 'public'));
             }
 
             // Check if a soft-deleted user with same login_identifier exists
@@ -185,7 +185,7 @@ class AdminStudentController extends Controller
                 if ($student->user->profile_photo_path) {
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($student->user->profile_photo_path);
                 }
-                $userData['profile_photo_path'] = $request->file('profile_photo')->store('profiles', 'public');
+                $userData['profile_photo_path'] = $request->file('profile_photo')->store('profiles', env('UPLOAD_DISK', 'public'));
             }
 
             if ($request->filled('password')) {

@@ -50,7 +50,7 @@ class AcademicEventController extends Controller
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $canCreate = $user->hasRole('admin') || $user->hasRole('teacher');
+        $canCreate = $user->hasRole('admin');
 
         // Merge student assignments if the user is a student
         $isStudent = $user->hasRole('student');

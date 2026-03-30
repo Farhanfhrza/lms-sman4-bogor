@@ -206,6 +206,7 @@ Route::middleware(['auth', 'check.email'])->group(function () {
             Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
             Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
             Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
+            Route::post('/quizzes/{quiz}/reset-attempt', [QuizController::class, 'resetAttempt'])->name('quizzes.reset-attempt');
 
             // Attendances CRUD
             Route::prefix('attendances')->name('attendances.')->group(function () {
@@ -215,6 +216,10 @@ Route::middleware(['auth', 'check.email'])->group(function () {
                 Route::get('/meetings/{meeting}', [CourseAttendanceController::class, 'showMeeting'])->name('showMeeting');
                 Route::put('/meetings/{meeting}/roster', [CourseAttendanceController::class, 'updateRoster'])->name('updateRoster');
             });
+
+            // Content Replication (Import)
+            Route::get('/import/tree', [\App\Http\Controllers\TeacherContentReplicationController::class, 'getTree'])->name('import.tree');
+            Route::post('/import', [\App\Http\Controllers\TeacherContentReplicationController::class, 'import'])->name('import.store');
         });
     });
 });
