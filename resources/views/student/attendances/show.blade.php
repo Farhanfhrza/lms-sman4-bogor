@@ -39,10 +39,10 @@
             <p class="text-xl font-bold text-gray-800 mt-1">{{ $course->subject->name ?? 'Course' }} - {{ $course->schoolClass->name ?? 'Class' }}</p>
         </div>
 
-        <div class="flex items-center mb-6 space-x-3">
-            <button class="bg-[#59b88b] text-white px-4 py-2 rounded-md font-medium shadow-sm hover:bg-[#4a9f77] transition-colors">All</button>
-            <input type="text" placeholder="Search" class="border-gray-300 rounded-md shadow-sm focus:border-[#1a6341] focus:ring-[#1a6341] text-sm py-2 px-3 pl-8">
-            <button class="bg-[#59b88b] text-white px-4 py-2 rounded-md font-medium flex items-center shadow-sm hover:bg-[#4a9f77] transition-colors">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-3 mb-6">
+            <button class="w-full sm:w-auto bg-[#59b88b] text-white px-4 py-2 rounded-md font-medium shadow-sm hover:bg-[#4a9f77] transition-colors">All</button>
+            <input type="text" placeholder="Search" class="border-gray-300 rounded-md shadow-sm focus:border-[#1a6341] focus:ring-[#1a6341] text-sm py-2 px-3 pl-8 w-full sm:w-auto">
+            <button class="w-full sm:w-auto justify-center bg-[#59b88b] text-white px-4 py-2 rounded-md font-medium flex items-center shadow-sm hover:bg-[#4a9f77] transition-colors">
                 Sort by Date
                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
@@ -68,31 +68,31 @@
 
                 @if(!$isLocked)
                     <!-- Active, Unlocked Meeting (Ready for Self Check-in) -->
-                    <div class="bg-white border border-[#1a6341] rounded-xl p-6 shadow-sm">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center space-x-6">
-                                <div class="text-xl font-bold text-gray-800 w-32">
-                                    {{ \Carbon\Carbon::parse($meeting->meeting_date)->format('m/d/Y') }}
+                    <div class="bg-white border border-[#1a6341] rounded-xl p-4 sm:p-6 shadow-sm">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3 md:gap-0">
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 w-full md:w-auto">
+                                <div class="text-lg sm:text-xl font-bold text-gray-800 w-full sm:w-32 border-b sm:border-b-0 border-gray-200 pb-2 sm:pb-0">
+                                    {{ \Carbon\Carbon::parse($meeting->meeting_date)->format('d M Y') }}
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-gray-900 text-lg">Pertemuan {{ $loop->iteration }}</h4> <!-- Note: iteration is chronological index if sorting ASC. Wait, sorting is DESC here, so it says "Pertemuan Terakhir" etc. -->
+                                    <h4 class="font-bold text-gray-900 text-base sm:text-lg">Pertemuan {{ $loop->iteration }}</h4>
                                     <p class="text-gray-600">{{ $meeting->title }}</p>
                                 </div>
                             </div>
-                            <div class="text-[#1a6341] font-bold text-sm bg-green-50 px-3 py-1 rounded border border-green-200">
+                            <div class="text-[#1a6341] font-bold text-xs sm:text-sm bg-green-50 px-3 py-1.5 rounded border border-green-200 self-start md:self-auto uppercase tracking-wide">
                                 SEDANG BERLANGSUNG
                             </div>
                         </div>
 
-                        <form action="{{ route('student.attendances.submit', [$course, $meeting]) }}" method="POST" class="flex space-x-4 mt-4">
+                        <form action="{{ route('student.attendances.submit', [$course, $meeting]) }}" method="POST" class="flex flex-col sm:flex-row gap-3 sm:space-x-4 mt-4">
                             @csrf
-                            <button type="submit" name="status" value="Hadir" class="flex-1 bg-[#1a6341] hover:bg-[#155034] text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-center">
+                            <button type="submit" name="status" value="Hadir" class="w-full sm:flex-1 bg-[#1a6341] hover:bg-[#155034] text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-center">
                                 Hadir
                             </button>
-                            <button type="submit" name="status" value="Izin" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-center">
+                            <button type="submit" name="status" value="Izin" class="w-full sm:flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-center">
                                 Izin
                             </button>
-                            <button type="submit" name="status" value="Sakit" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-center">
+                            <button type="submit" name="status" value="Sakit" class="w-full sm:flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-sm text-center">
                                 Sakit
                             </button>
                         </form>
@@ -113,23 +113,23 @@
                             $statusColor = 'bg-gray-600'; // Izin/Sakit
                         }
                     @endphp
-                    <div class="{{ $bgClass }} rounded-xl p-4 flex items-center justify-between shadow-sm">
-                        <div class="flex items-center space-x-6">
-                            <div class="text-xl font-bold text-gray-800 w-32">
-                                {{ \Carbon\Carbon::parse($meeting->meeting_date)->format('m/d/Y') }}
+                    <div class="{{ $bgClass }} rounded-xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                            <div class="text-lg sm:text-xl font-bold text-gray-800 sm:w-32 border-b sm:border-b-0 border-gray-400 pb-2 sm:pb-0">
+                                {{ \Carbon\Carbon::parse($meeting->meeting_date)->format('d M Y') }}
                             </div>
                             <div>
-                                <h4 class="font-bold text-gray-900">Materi: {{ $meeting->title }}</h4>
-                                <p class="text-gray-600 text-sm">Waktu Pelaksanaan: {{ \Carbon\Carbon::parse($meeting->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($meeting->end_time)->format('H:i') }}</p>
+                                <h4 class="font-bold text-gray-900 text-base sm:text-lg">Materi: {{ $meeting->title }}</h4>
+                                <p class="text-gray-700 text-sm mt-1">Waktu: {{ \Carbon\Carbon::parse($meeting->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($meeting->end_time)->format('H:i') }}</p>
                             </div>
                         </div>
 
-                        <div class="flex items-center space-x-4">
-                            <div class="{{ $statusColor }} text-white font-bold py-2.5 px-12 rounded-lg text-center min-w-[140px] shadow-sm">
+                        <div class="flex items-center justify-between sm:justify-start gap-3 sm:space-x-4 mt-2 md:mt-0 w-full md:w-auto">
+                            <div class="{{ $statusColor }} text-white font-bold py-2.5 px-4 sm:px-12 rounded-lg text-center flex-1 md:min-w-[140px] shadow-sm text-sm sm:text-base">
                                 {{ $studentStatus }}
                             </div>
                             <!-- Lock Icon -->
-                            <div class="bg-gray-600 text-white p-2.5 rounded-lg shadow-sm">
+                            <div class="bg-gray-600 text-white p-2.5 rounded-lg shadow-sm flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                 </svg>

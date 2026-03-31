@@ -102,6 +102,30 @@ class CourseAttendanceController extends Controller
     }
 
     /**
+     * Update the details of a specific course meeting.
+     */
+    public function updateMeeting(Request $request, ClassSubject $course, CourseMeeting $meeting)
+    {
+        // Ensure meeting belongs to course
+        if ($meeting->class_subject_id !== $course->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'meeting_date' => 'required|date',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $meeting->update($validated);
+
+        return redirect()->route('manage.courses.attendances.showMeeting', [$course, $meeting])
+                         ->with('success', 'Detail pertemuan berhasil diperbarui.');
+    }
+
+    /**
      * Display the detailed roster for a specific meeting.
      */
     public function showMeeting(ClassSubject $course, CourseMeeting $meeting)

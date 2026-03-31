@@ -12,10 +12,10 @@
         </div>
 
         <!-- Filters (Mockup) -->
-        <div class="flex flex-wrap items-center gap-3 mb-6">
-            <button class="bg-[#59b88b] text-white px-4 py-2 rounded-md font-medium shadow-sm hover:bg-[#4a9f77] transition-colors whitespace-nowrap">All</button>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-3 mb-6">
+            <button class="w-full sm:w-auto bg-[#59b88b] text-white px-4 py-2 rounded-md font-medium shadow-sm hover:bg-[#4a9f77] transition-colors whitespace-nowrap">All</button>
             <input type="text" placeholder="Search" class="border-gray-300 rounded-md shadow-sm focus:border-[#1a6341] focus:ring-[#1a6341] text-sm py-2 px-3 w-full sm:w-auto">
-            <button class="bg-[#59b88b] text-white px-4 py-2 rounded-md font-medium flex items-center shadow-sm hover:bg-[#4a9f77] transition-colors whitespace-nowrap">
+            <button class="w-full sm:w-auto justify-center bg-[#59b88b] text-white px-4 py-2 rounded-md font-medium flex items-center shadow-sm hover:bg-[#4a9f77] transition-colors whitespace-nowrap">
                 Sort by course name
                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
@@ -39,20 +39,20 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-6 mt-2 md:mt-0">
-                            <div class="bg-gray-200 text-gray-700 px-3 py-2 md:px-4 md:py-2 rounded-lg font-medium text-xs md:text-sm flex flex-wrap gap-x-3 gap-y-1 md:gap-x-3">
-                                <span>Pertemuan: {{ $course->stats['pertemuan'] }}</span>
-                                <span>Hadir: {{ $course->stats['hadir'] }}</span>
-                                <span>Izin: {{ $course->stats['izin'] }}</span>
-                                <span>Sakit: {{ $course->stats['sakit'] }}</span>
-                                <span>Alpha: {{ $course->stats['alpha'] }}</span>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 md:gap-6 mt-4 md:mt-0 w-full sm:w-auto">
+                            <div class="bg-gray-100 sm:bg-gray-200 text-gray-700 p-3 md:px-4 md:py-2 rounded-lg font-medium text-xs md:text-sm grid grid-cols-2 lg:flex lg:flex-wrap gap-2 lg:gap-x-3 w-full sm:w-auto">
+                                <span class="col-span-2 lg:col-span-1 border-b border-gray-200 lg:border-none pb-1 lg:pb-0 mb-1 lg:mb-0 text-center lg:text-left">Pertemuan: {{ $course->stats['pertemuan'] }}</span>
+                                <span class="text-center lg:text-left">Hadir: {{ $course->stats['hadir'] }}</span>
+                                <span class="text-center lg:text-left">Sakit: {{ $course->stats['sakit'] }}</span>
+                                <span class="text-center lg:text-left">Izin: {{ $course->stats['izin'] }}</span>
+                                <span class="text-center lg:text-left">Alpha: {{ $course->stats['alpha'] }}</span>
                             </div>
 
                             <!-- Percentage Box -->
                             @php
                                 $percentColor = $course->percentage >= 75 ? 'bg-[#1a6341]' : ($course->percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500');
                             @endphp
-                            <div class="{{ $percentColor }} text-white font-bold px-4 py-2 sm:py-3 rounded-lg min-w-[60px] text-center text-sm md:text-lg shadow-sm self-end sm:self-auto w-fit sm:w-auto">
+                            <div class="{{ $percentColor }} text-white font-bold px-4 py-3 rounded-lg flex-shrink-0 text-center text-base md:text-lg shadow-sm w-full sm:w-auto self-stretch flex items-center justify-center">
                                 {{ $course->percentage }}%
                             </div>
                         </div>

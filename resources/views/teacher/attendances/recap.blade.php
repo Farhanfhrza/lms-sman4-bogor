@@ -43,8 +43,8 @@
                     <thead class="bg-gray-100">
                         <tr>
                             <!-- Fixed Left Columns -->
-                            <th scope="col" class="sticky top-0 left-0 z-20 bg-gray-100 px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-16 border-r border-b border-gray-300 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">No.</th>
-                            <th scope="col" class="sticky top-0 left-16 z-20 bg-gray-100 px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-64 border-r border-b border-gray-300 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Siswa</th>
+                            <th scope="col" class="sticky top-0 left-auto md:left-0 z-20 bg-gray-100 px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-16 border-r border-b border-gray-300 md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">No.</th>
+                            <th scope="col" class="sticky top-0 left-auto md:left-16 z-20 bg-gray-100 px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-64 border-r border-b border-gray-300 md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Siswa</th>
                             
                             <!-- Scrollable Middle Columns (Meetings) -->
                             @foreach($meetings as $index => $meeting)
@@ -55,9 +55,9 @@
 
                             <!-- Fixed Right Column -->
                             @if($meetings->count() > 0)
-                                <th scope="col" class="sticky top-0 right-0 z-20 bg-[#e8f4ec] px-6 py-4 text-center text-xs font-bold text-[#1a6341] uppercase tracking-wider w-32 border-l border-b border-green-200 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">Persentase</th>
+                                <th scope="col" class="sticky top-0 right-auto md:right-0 z-20 bg-[#e8f4ec] px-6 py-4 text-center text-xs font-bold text-[#1a6341] uppercase tracking-wider w-32 border-l border-b border-green-200 md:shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">Persentase</th>
                             @else
-                                <th scope="col" class="sticky top-0 right-0 z-20 bg-[#e8f4ec] px-6 py-4 text-center text-xs font-bold text-[#1a6341] uppercase tracking-wider w-32 border-l border-b border-green-200 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">Persentase</th>
+                                <th scope="col" class="sticky top-0 right-auto md:right-0 z-20 bg-[#e8f4ec] px-6 py-4 text-center text-xs font-bold text-[#1a6341] uppercase tracking-wider w-32 border-l border-b border-green-200 md:shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">Persentase</th>
                             @endif
                         </tr>
                     </thead>
@@ -66,10 +66,10 @@
                         @forelse($matrix as $studentId => $data)
                             <tr class="hover:bg-gray-50 transition-colors group">
                                 <!-- Fixed Left Columns -->
-                                <td class="sticky left-0 z-10 bg-white group-hover:bg-gray-50 px-6 py-3 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                                <td class="sticky left-auto md:left-0 z-10 bg-white group-hover:bg-gray-50 px-6 py-3 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200 md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                                     {{ $no++ }}
                                 </td>
-                                <td class="sticky left-16 z-10 bg-white group-hover:bg-gray-50 px-6 py-3 border-r border-gray-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] text-sm">
+                                <td class="sticky left-auto md:left-16 z-10 bg-white group-hover:bg-gray-50 px-6 py-3 border-r border-gray-200 md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] text-sm">
                                     <div class="font-bold text-gray-900">{{ $data['student']->user->full_name }}</div>
                                     <div class="text-xs text-gray-500">{{ $data['student']->nisn }}</div>
                                 </td>
@@ -101,7 +101,7 @@
                                 @endforeach
 
                                 <!-- Fixed Right Column -->
-                                <td class="sticky right-0 z-10 bg-white group-hover:bg-gray-50 px-6 py-3 text-center whitespace-nowrap border-l border-gray-200 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                                <td class="sticky right-auto md:right-0 z-10 bg-white group-hover:bg-gray-50 px-6 py-3 text-center whitespace-nowrap border-l border-gray-200 md:shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                                     <div class="inline-flex items-center justify-center px-2.5 py-1 text-sm font-bold rounded-full {{ $data['percentage'] >= 75 ? 'bg-green-100 text-green-800' : ($data['percentage'] >= 50 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
                                         {{ $data['percentage'] }}%
                                     </div>

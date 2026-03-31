@@ -220,6 +220,7 @@ Route::middleware(['auth', 'check.email'])->group(function () {
                 Route::get('/recap', [CourseAttendanceController::class, 'recap'])->name('recap');
                 Route::post('/meetings', [CourseAttendanceController::class, 'storeMeeting'])->name('meetings.store');
                 Route::get('/meetings/{meeting}', [CourseAttendanceController::class, 'showMeeting'])->name('showMeeting');
+                Route::put('/meetings/{meeting}', [CourseAttendanceController::class, 'updateMeeting'])->name('meetings.update');
                 Route::put('/meetings/{meeting}/roster', [CourseAttendanceController::class, 'updateRoster'])->name('updateRoster');
             });
 
