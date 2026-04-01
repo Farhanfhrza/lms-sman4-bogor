@@ -175,6 +175,7 @@ Route::middleware(['auth', 'check.email'])->group(function () {
         
         // Global Attendance Dashboard
         Route::get('manage/attendances', [CourseAttendanceController::class, 'dashboard'])->name('manage.attendances.dashboard');
+        Route::get('manage/attendances/classes/{schoolClass}', [CourseAttendanceController::class, 'adminClassSubjects'])->name('manage.attendances.class-subjects');
 
         Route::prefix('manage/courses/{course}')->name('manage.courses.')->group(function () {
             // Course manage page

@@ -18,6 +18,21 @@ class CourseAttendanceController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+
+        // Admin POV: Shows all classes in active academic year
+        if ($user->hasRole('admin')) {
+            $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
+            
+            $classes = collect();
+            if ($activeYear) {
+                // Order by grade then name
+                $classes = \App\Models\SchoolClass::where('academic_year_id', $activeYear->id)
+                    ->orderBy('grade')
+                    ->orderBy('name')
+                    ->get();
+            }
+            return view('admin.attendances.dashboard', compact('classes', 'activeYear'));
+        }
         
         // This assumes the user is a teacher. 
         // We get courses where they are the assigned teacher.
@@ -32,6 +47,17 @@ class CourseAttendanceController extends Controller
         }
 
         return view('teacher.attendances.dashboard', compact('courses'));
+    }
+
+    /**
+     * Display disciplines/subjects under a specific class for the admin POV
+     */
+    public function adminClassSubjects(\App\Models\SchoolClass $schoolClass)
+    {
+        // Get the subjects for this class
+        $courses = $schoolClass->classSubjects()->with(['subject', 'teacher.user'])->get();
+
+        return view('admin.attendances.class-subjects', compact('schoolClass', 'courses'));
     }
 
     /**

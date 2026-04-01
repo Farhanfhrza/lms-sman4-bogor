@@ -65,18 +65,20 @@ class AdminAcademicYearController extends Controller
             return redirect()->route('admin.academic-years.index')->with('error', 'Tidak dapat menghapus Tahun Ajaran yang sedang aktif.');
         }
 
-        // Warning: This could cascade delete school_classes, class_subjects, etc.
-        // It's usually better to soft delete or prevent deletion if it has relations.
-        if ($academicYear->classes()->exists()) {
-             return redirect()->route('admin.academic-years.index')->with('error', 'Tidak dapat menghapus Tahun Ajaran ini karena sudah memiliki data kelas.');
+        try {
+            $name = $academicYear->name;
+            $academicYear->delete();
+
+            ActivityLogger::log(null, 'deleted', null, "Menghapus Tahun Ajaran: {$name}");
+
+            return redirect()->route('admin.academic-years.index')->with('success', 'Tahun Ajaran berhasil dihapus.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Constraint violation: ada data lain yang masih terikat dengan ID tahun ajaran ini
+            return redirect()->route('admin.academic-years.index')->with('error', 'Tidak dapat menghapus Tahun Ajaran ini karena sedang digunakan oleh data lain (Kelas, Mata Pelajaran, Jadwal, dll).');
+        } catch (\Exception $e) {
+            \Log::error('Error deleting AcademicYear: ' . $e->getMessage());
+            return redirect()->route('admin.academic-years.index')->with('error', 'Terjadi kesalahan sistem saat mencoba menghapus data.');
         }
-
-        $name = $academicYear->name;
-        $academicYear->delete();
-
-        ActivityLogger::log(null, 'deleted', null, "Menghapus Tahun Ajaran: {$name}");
-
-        return redirect()->route('admin.academic-years.index')->with('success', 'Tahun Ajaran berhasil dihapus.');
     }
 
     public function activate(AcademicYear $academicYear): RedirectResponse
