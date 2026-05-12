@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Teacher;
 use App\Models\Subject;
+use App\Imports\TeachersImport;
 use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminTeacherController extends Controller
 {
@@ -190,5 +192,36 @@ class AdminTeacherController extends Controller
 
         return redirect()->route('admin.teachers.index')
             ->with('success', 'Guru berhasil dihapus.');
+    }
+    /**
+     * Import teachers from an Excel/CSV file.
+     */
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls|max:5120',
+        ]);
+
+        $import = new TeachersImport();
+        Excel::import($import, $request->file('file'));
+
+        $count = $import->getImportedCount();
+        $skipped = $import->getSkippedCount();
+        $errors = $import->getRowErrors();
+
+        $message = "{$count} guru berhasil diimpor.";
+        if ($skipped > 0) {
+            $message .= " {$skipped} baris dilewati karena ada error.";
+        }
+
+        ActivityLogger::log(null, 'created', null, "Import Excel: {$count} guru baru");
+
+        $redirect = redirect()->route('admin.teachers.index')->with('success', $message);
+
+        if (!empty($errors)) {
+            $redirect->with('import_errors', $errors);
+        }
+
+        return $redirect;
     }
 }

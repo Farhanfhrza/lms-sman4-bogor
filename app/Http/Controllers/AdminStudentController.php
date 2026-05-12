@@ -225,9 +225,6 @@ class AdminStudentController extends Controller
             ->with('success', 'Siswa berhasil dihapus.');
     }
 
-    /**
-     * Import students from an Excel/CSV file.
-     */
     public function import(Request $request): RedirectResponse
     {
         $request->validate([
@@ -240,15 +237,21 @@ class AdminStudentController extends Controller
 
         $count = $import->getImportedCount();
         $skipped = $import->getSkippedCount();
+        $errors = $import->getRowErrors();
 
         $message = "{$count} siswa berhasil diimpor.";
         if ($skipped > 0) {
-            $message .= " {$skipped} baris dilewati (duplikat/kosong).";
+            $message .= " {$skipped} baris dilewati karena ada error.";
         }
 
         ActivityLogger::log(null, 'created', null, "Import Excel: {$count} siswa baru (Angkatan {$request->enrollment_year})");
 
-        return redirect()->route('admin.students.index')
-            ->with('success', $message);
+        $redirect = redirect()->route('admin.students.index')->with('success', $message);
+
+        if (!empty($errors)) {
+            $redirect->with('import_errors', $errors);
+        }
+
+        return $redirect;
     }
 }

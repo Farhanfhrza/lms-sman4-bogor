@@ -5,22 +5,56 @@
         </h2>
     </x-slot>
 
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-[#1a6341] relative">
+    <div x-data="{ showImportModal: false }" class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-[#1a6341] relative">
         <div class="p-6 text-gray-900">
             
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-gray-100 p-4 rounded-t-lg border-b-2 border-yellow-400">
                 <h3 class="text-lg font-bold text-gray-800 mb-4 md:mb-0">
                     Daftar Guru — Total: {{ $teachers->total() }}
                 </h3>
-                <a href="{{ route('admin.teachers.create') }}" class="bg-[#1a6341] hover:bg-[#238054] text-white px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center text-sm font-medium">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Tambah Guru
-                </a>
+                <div class="flex items-center space-x-2">
+                    <button @click="showImportModal = true" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center text-sm font-medium">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        Import Excel
+                    </button>
+                    <a href="{{ route('admin.teachers.create') }}" class="bg-[#1a6341] hover:bg-[#238054] text-white px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center text-sm font-medium">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Tambah Manual
+                    </a>
+                </div>
             </div>
 
             @if(session('success'))
             <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
                 {{ session('success') }}
+            </div>
+            @endif
+
+            @if($errors->any())
+            <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            @if(session('import_errors'))
+            <div class="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg text-sm">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-orange-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-orange-800 mb-1">Peringatan! Beberapa baris data dilewati (gagal diimpor):</h4>
+                        <div class="max-h-48 overflow-y-auto mt-2 space-y-1 pr-2">
+                            <ul class="list-disc list-inside text-orange-700">
+                                @foreach(session('import_errors') as $importError)
+                                    <li>{{ $importError }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
             @endif
 
@@ -102,6 +136,88 @@
                 <div>
                     {{ $teachers->links() }}
                 </div>
+            </div>
+        </div>
+
+        <!-- Import Excel Modal -->
+        <div x-show="showImportModal" x-cloak
+             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            <div @click.away="showImportModal = false"
+                 class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100">
+
+                <!-- Modal Header -->
+                <div class="bg-[#1a6341] text-white px-6 py-4 flex items-center justify-between">
+                    <h3 class="text-lg font-bold flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        Import Data Guru dari Excel
+                    </h3>
+                    <button @click="showImportModal = false" class="text-white/80 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <form method="POST" action="{{ route('admin.teachers.import') }}" enctype="multipart/form-data" class="p-6 space-y-5">
+                    @csrf
+
+                    <div>
+                        <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File Excel / CSV <span class="text-red-500">*</span></label>
+                        <input type="file" id="file" name="file" required accept=".xlsx,.csv,.xls"
+                               class="w-full border border-gray-300 rounded-md shadow-sm text-sm file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-[#1a6341] file:text-white hover:file:bg-[#238054]">
+                        <p class="text-xs text-gray-400 mt-1">Format: .xlsx, .csv, .xls (maks. 5MB)</p>
+                    </div>
+
+                    <!-- Format Instructions -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm mt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="font-semibold text-blue-800">📋 Contoh Format File Excel/CSV:</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs border border-blue-200">
+                                <thead>
+                                    <tr class="bg-blue-100">
+                                        <th class="border border-blue-200 px-3 py-1 text-left">NAMA</th>
+                                        <th class="border border-blue-200 px-3 py-1 text-left">LOGIN_ID</th>
+                                        <th class="border border-blue-200 px-3 py-1 text-left">NIP</th>
+                                        <th class="border border-blue-200 px-3 py-1 text-left">JENIS_KELAMIN</th>
+                                        <th class="border border-blue-200 px-3 py-1 text-left">SPESIALISASI</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="border border-blue-200 px-3 py-1 text-gray-600">Ahmad Guru</td>
+                                        <td class="border border-blue-200 px-3 py-1 text-gray-600 font-mono">ahmad123</td>
+                                        <td class="border border-blue-200 px-3 py-1 text-gray-600 font-mono">19800101...</td>
+                                        <td class="border border-blue-200 px-3 py-1 text-gray-600 font-mono text-center">L</td>
+                                        <td class="border border-blue-200 px-3 py-1 text-gray-600">Matematika</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="mt-3 text-blue-600 text-xs space-y-1">
+                            ✅ <strong>NAMA</strong>, <strong>LOGIN_ID</strong>, dan <strong>JENIS_KELAMIN</strong> (L/P) wajib diisi.<br>
+                            ✅ <strong>NIP</strong> dan <strong>SPESIALISASI</strong> opsional.<br>
+                            ✅ Password default akun: <code class="bg-blue-100 px-1 rounded">Guru[LOGIN_ID]</code>
+                        </p>
+                    </div>
+
+                    <div class="flex items-center justify-end pt-2 border-t border-gray-200">
+                        <button type="button" @click="showImportModal = false" class="text-gray-500 hover:text-gray-700 mr-4 text-sm">Batal</button>
+                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2.5 rounded-lg shadow-sm transition-colors text-sm font-medium flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            Mulai Import
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

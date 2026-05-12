@@ -40,6 +40,24 @@
             </div>
             @endif
 
+            @if(session('import_errors'))
+            <div class="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg text-sm">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-orange-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-orange-800 mb-1">Peringatan! Beberapa baris data dilewati (gagal diimpor):</h4>
+                        <div class="max-h-48 overflow-y-auto mt-2 space-y-1 pr-2">
+                            <ul class="list-disc list-inside text-orange-700">
+                                @foreach(session('import_errors') as $importError)
+                                    <li>{{ $importError }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <form method="GET" action="{{ route('admin.students.index') }}" class="flex flex-col md:flex-row justify-between items-center mb-4 text-sm text-gray-600 gap-3">
                 <div class="flex items-center gap-3">
                     <div class="flex items-center">
