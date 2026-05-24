@@ -113,7 +113,7 @@ class AdminTeacherController extends Controller
 
         $breadcrumbs = [
             ['label' => 'Data Guru', 'url' => route('admin.teachers.index')],
-            ['label' => 'Edit: ' . ($teacher->user->full_name ?? '')],
+            ['label' => 'Edit: ' . ($teacher->user?->full_name ?? '')],
         ];
 
         return view('admin.teachers.edit', compact('teacher', 'subjects', 'assignedSubjectIds', 'breadcrumbs'));
@@ -146,7 +146,7 @@ class AdminTeacherController extends Controller
             ];
 
             if ($request->hasFile('profile_photo')) {
-                if ($teacher->user->profile_photo_path) {
+                if ($teacher->user?->profile_photo_path) {
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($teacher->user->profile_photo_path);
                 }
                 $userData['profile_photo_path'] = $request->file('profile_photo')->store('profiles', env('UPLOAD_DISK', 'public'));
@@ -156,7 +156,7 @@ class AdminTeacherController extends Controller
                 $userData['password'] = Hash::make($request->password);
             }
 
-            $teacher->user->update($userData);
+            $teacher->user?->update($userData);
 
             $teacher->update([
                 'nip'            => $request->nip,
@@ -179,12 +179,12 @@ class AdminTeacherController extends Controller
     public function destroy(Teacher $teacher): RedirectResponse
     {
         $teacher->load('user');
-        $name = $teacher->user->full_name ?? 'Guru';
+        $name = $teacher->user?->full_name ?? 'Guru';
 
         ActivityLogger::log(null, 'deleted', $teacher, 'Menghapus guru: ' . $name);
 
         DB::transaction(function () use ($teacher) {
-            $teacher->user->delete();
+            $teacher->user?->delete();
             $teacher->delete();
         });
 

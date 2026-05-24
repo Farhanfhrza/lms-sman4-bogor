@@ -100,10 +100,10 @@
                                     <div class="h-10 w-10 flex-shrink-0 mr-3 rounded-full overflow-hidden border border-gray-200 shadow-sm">
                                         <img class="h-10 w-10 object-cover" src="{{ optional($student->user)->profile_photo_url }}" alt="">
                                     </div>
-                                    <div class="font-medium text-gray-700">{{ $student->user->full_name ?? '-' }}</div>
+                                    <div class="font-medium text-gray-700">{{ $student->user?->full_name ?? '-' }}</div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $student->user->email ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $student->user?->email ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-600 font-mono">{{ $student->nisn ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-600">
                                 @php
@@ -127,8 +127,8 @@
                                     <x-confirm-delete-modal
                                         :id="'del-student-'.$student->id"
                                         title="Hapus Siswa?"
-                                        :description="'Data siswa &quot;'.($student->user->full_name ?? $student->user->name).'&quot; beserta akun dan seluruh riwayat tugasnya akan terhapus permanen.'"
-                                        :confirmText="$student->user->full_name ?? $student->user->name"
+                                        :description="'Data siswa &quot;'.($student->user?->full_name ?? $student->user?->name ?? 'Siswa').'&quot; beserta akun dan seluruh riwayat tugasnya akan terhapus permanen.'"
+                                        :confirmText="$student->user?->full_name ?? $student->user?->name ?? 'Siswa'"
                                         :action="route('admin.students.destroy', $student)"
                                         buttonLabel="Ya, Hapus Siswa"
                                     />
@@ -186,7 +186,7 @@
                 </div>
 
                 <!-- Modal Body -->
-                <form method="POST" action="{{ route('admin.students.import') }}" enctype="multipart/form-data" class="p-6 space-y-5">
+                <form method="POST" action="{{ route('admin.students.import.preview') }}" enctype="multipart/form-data" class="p-6 space-y-5">
                     @csrf
 
                     <div>

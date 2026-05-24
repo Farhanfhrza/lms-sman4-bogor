@@ -125,7 +125,8 @@ Route::middleware(['auth', 'check.email'])->group(function () {
         Route::get('/students', [AdminStudentController::class, 'index'])->name('students.index');
         Route::get('/students/create', [AdminStudentController::class, 'create'])->name('students.create');
         Route::post('/students', [AdminStudentController::class, 'store'])->name('students.store');
-        Route::post('/students/import', [AdminStudentController::class, 'import'])->name('students.import');
+        Route::post('/students/import/preview', [AdminStudentController::class, 'importPreview'])->name('students.import.preview');
+        Route::post('/students/import/process', [AdminStudentController::class, 'importProcess'])->name('students.import.process');
         Route::get('/students/{student}/edit', [AdminStudentController::class, 'edit'])->name('students.edit');
         Route::put('/students/{student}', [AdminStudentController::class, 'update'])->name('students.update');
         Route::delete('/students/{student}', [AdminStudentController::class, 'destroy'])->name('students.destroy');

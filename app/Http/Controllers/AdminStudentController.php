@@ -150,7 +150,7 @@ class AdminStudentController extends Controller
 
         $breadcrumbs = [
             ['label' => 'Data Siswa', 'url' => route('admin.students.index')],
-            ['label' => 'Edit: ' . ($student->user->full_name ?? '')],
+            ['label' => 'Edit: ' . ($student->user?->full_name ?? '')],
         ];
 
         return view('admin.students.edit', compact('student', 'breadcrumbs'));
@@ -182,7 +182,7 @@ class AdminStudentController extends Controller
             ];
 
             if ($request->hasFile('profile_photo')) {
-                if ($student->user->profile_photo_path) {
+                if ($student->user?->profile_photo_path) {
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($student->user->profile_photo_path);
                 }
                 $userData['profile_photo_path'] = $request->file('profile_photo')->store('profiles', env('UPLOAD_DISK', 'public'));
@@ -192,7 +192,7 @@ class AdminStudentController extends Controller
                 $userData['password'] = Hash::make($request->password);
             }
 
-            $student->user->update($userData);
+            $student->user?->update($userData);
 
             $student->update([
                 'nisn'            => $request->nisn,
@@ -212,12 +212,12 @@ class AdminStudentController extends Controller
     public function destroy(Student $student): RedirectResponse
     {
         $student->load('user');
-        $name = $student->user->full_name ?? 'Siswa';
+        $name = $student->user?->full_name ?? 'Siswa';
 
         ActivityLogger::log(null, 'deleted', $student, 'Menghapus siswa: ' . $name);
 
         DB::transaction(function () use ($student) {
-            $student->user->delete();
+            $student->user?->delete();
             $student->delete();
         });
 
@@ -226,17 +226,114 @@ class AdminStudentController extends Controller
     }
 
     /**
-     * Import students from an Excel/CSV file.
+     * Preview validation of imported students.
      */
-    public function import(Request $request): RedirectResponse
+    public function importPreview(Request $request): View
     {
         $request->validate([
             'file'            => 'required|file|mimes:xlsx,csv,xls|max:5120',
             'enrollment_year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
         ]);
 
+        $file = $request->file('file');
+        // Store temporarily
+        $tempPath = $file->store('temp_imports');
+        
+        $data = Excel::toArray(new \App\Imports\PreviewImport, storage_path('app/' . $tempPath));
+        $rows = $data[0] ?? [];
+
+        $previewData = [];
+        $validCount = 0;
+        $invalidCount = 0;
+
+        foreach ($rows as $index => $row) {
+            $name = $row['nama'] ?? $row['name'] ?? null;
+            $nisn = $row['nisn'] ?? null;
+            
+            $status = 'valid';
+            $errors = [];
+
+            if (empty($name)) {
+                $errors[] = 'Nama kosong';
+                $status = 'invalid';
+            }
+            if (empty($nisn)) {
+                $errors[] = 'NISN kosong';
+                $status = 'invalid';
+            } else {
+                $nisn = trim((string) $nisn);
+                if (Student::where('nisn', $nisn)->exists()) {
+                    $errors[] = "NISN $nisn sudah terdaftar";
+                    $status = 'invalid';
+                }
+                
+                $email = $nisn . '@student.sman4bogor.sch.id';
+                // Check if user exists but NOT soft deleted (active user collision)
+                $existingUser = User::where('email', $email)->first();
+                if ($existingUser && !$existingUser->trashed()) {
+                    // if it's trashed, our StudentsImport will restore it, which is fine
+                    $errors[] = "Email $email sudah terpakai user aktif";
+                    $status = 'invalid';
+                }
+            }
+
+            $genderRaw = $row['jk'] ?? $row['jenis_kelamin'] ?? $row['gender'] ?? null;
+            $gender = '-';
+            if ($genderRaw) {
+                $g = strtoupper(trim((string) $genderRaw));
+                if (in_array($g, ['L', 'P', 'LAKI-LAKI', 'PEREMPUAN', 'M', 'F'])) {
+                    $gender = in_array($g, ['L', 'LAKI-LAKI', 'M']) ? 'L (Laki-laki)' : 'P (Perempuan)';
+                } else {
+                    $errors[] = "Format gender '$genderRaw' tidak dikenali";
+                    $status = 'invalid';
+                }
+            } else {
+                $errors[] = 'Gender kosong';
+                $status = 'invalid';
+            }
+
+            if ($status === 'valid') {
+                $validCount++;
+            } else {
+                $invalidCount++;
+            }
+
+            $previewData[] = [
+                'row_number' => $index + 2, // +1 for 0-index, +1 for header
+                'name' => $name ?? '-',
+                'nisn' => $nisn ?? '-',
+                'gender' => $gender,
+                'status' => $status,
+                'errors' => implode(', ', $errors)
+            ];
+        }
+
+        $enrollmentYear = $request->enrollment_year;
+
+        return view('admin.students.import_preview', compact('previewData', 'tempPath', 'enrollmentYear', 'validCount', 'invalidCount'));
+    }
+
+    /**
+     * Process the actual import using the temporary file.
+     */
+    public function importProcess(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'temp_path'       => 'required|string',
+            'enrollment_year' => 'required|integer',
+        ]);
+
+        $filePath = storage_path('app/' . $request->temp_path);
+        
+        if (!file_exists($filePath)) {
+            return redirect()->route('admin.students.index')->withErrors(['File import kedaluwarsa atau hilang. Silakan ulangi upload.']);
+        }
+
         $import = new StudentsImport($request->enrollment_year);
-        Excel::import($import, $request->file('file'));
+        Excel::import($import, $filePath);
+
+        // Clean up temp file
+        unlink($filePath);
 
         $count = $import->getImportedCount();
         $skipped = $import->getSkippedCount();

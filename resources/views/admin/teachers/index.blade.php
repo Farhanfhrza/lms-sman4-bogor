@@ -58,8 +58,8 @@
                         @forelse($teachers as $index => $teacher)
                         <tr class="hover:bg-gray-50 transition-colors {{ $index % 2 === 0 ? 'bg-gray-100' : '' }}">
                             <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $teachers->firstItem() + $index }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-700">{{ $teacher->user->full_name ?? '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $teacher->user->email ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-700">{{ $teacher->user?->full_name ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $teacher->user?->email ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $teacher->nip ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ $teacher->specialization ?? '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -73,8 +73,8 @@
                                     <x-confirm-delete-modal
                                         :id="'del-teacher-'.$teacher->id"
                                         title="Hapus Guru?"
-                                        :description="'Data guru &quot;'.$teacher->user->full_name.'&quot; beserta akun dan semua riwayat mengajarnya akan terhapus permanen.'"
-                                        :confirmText="$teacher->user->full_name"
+                                        :description="'Data guru &quot;'.($teacher->user?->full_name ?? 'Guru').'&quot; beserta akun dan semua riwayat mengajarnya akan terhapus permanen.'"
+                                        :confirmText="$teacher->user?->full_name ?? 'Guru'"
                                         :action="route('admin.teachers.destroy', $teacher)"
                                         buttonLabel="Ya, Hapus Guru"
                                     />
