@@ -117,6 +117,7 @@ Route::middleware(['auth', 'check.email'])->group(function () {
         Route::get('/teachers', [AdminTeacherController::class, 'index'])->name('teachers.index');
         Route::get('/teachers/create', [AdminTeacherController::class, 'create'])->name('teachers.create');
         Route::post('/teachers', [AdminTeacherController::class, 'store'])->name('teachers.store');
+        Route::post('/teachers/import', [AdminTeacherController::class, 'import'])->name('teachers.import');
         Route::get('/teachers/{teacher}/edit', [AdminTeacherController::class, 'edit'])->name('teachers.edit');
         Route::put('/teachers/{teacher}', [AdminTeacherController::class, 'update'])->name('teachers.update');
         Route::delete('/teachers/{teacher}', [AdminTeacherController::class, 'destroy'])->name('teachers.destroy');

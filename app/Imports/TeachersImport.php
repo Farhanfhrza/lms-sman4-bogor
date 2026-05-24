@@ -3,25 +3,19 @@
 namespace App\Imports;
 
 use App\Models\User;
-use App\Models\Student;
+use App\Models\Teacher;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToArray;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
+class TeachersImport implements ToArray, WithHeadingRow, WithChunkReading
 {
-    protected int $enrollmentYear;
     protected int $importedCount = 0;
     protected int $skippedCount = 0;
     protected int $currentRow = 1; // Heading is row 1
     public array $rowErrors = [];
-
-    public function __construct(int $enrollmentYear)
-    {
-        $this->enrollmentYear = $enrollmentYear;
-    }
 
     /**
      * Process each chunk of rows from the Excel file.
@@ -35,13 +29,15 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
 
             // Normalize column keys (support both Indonesian and English)
             $name = $row['nama'] ?? $row['name'] ?? null;
-            $nisn = $row['nisn'] ?? null;
+            $loginId = $row['login_id'] ?? $row['username'] ?? null;
+            $nip = $row['nip'] ?? null;
+            $specialization = $row['spesialisasi'] ?? $row['specialization'] ?? null;
 
             if (empty($name)) {
                 $errors[] = "Nama tidak boleh kosong.";
             }
-            if (empty($nisn)) {
-                $errors[] = "NISN tidak boleh kosong.";
+            if (empty($loginId)) {
+                $errors[] = "Login ID tidak boleh kosong.";
             }
 
             if (!empty($errors)) {
@@ -50,9 +46,14 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
                 continue;
             }
 
-            $nisn = trim((string) $nisn);
+            $loginId = trim((string) $loginId);
             $name = trim((string) $name);
-            $email = $nisn . '@student.sman4bogor.sch.id';
+            if ($nip !== null) {
+                $nip = trim((string) $nip);
+            }
+            if ($specialization !== null) {
+                $specialization = trim((string) $specialization);
+            }
 
             $genderRaw = $row['jk'] ?? $row['jenis_kelamin'] ?? $row['gender'] ?? null;
             $gender = null;
@@ -67,17 +68,15 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
                 $errors[] = "Jenis Kelamin tidak boleh kosong.";
             }
 
-            // Skip if NISN already exists in students table
-            if (Student::where('nisn', $nisn)->exists()) {
-                $errors[] = "NISN {$nisn} sudah terdaftar.";
+            // Skip if NIP already exists in teachers table
+            if (!empty($nip) && Teacher::where('nip', $nip)->exists()) {
+                $errors[] = "NIP {$nip} sudah terdaftar.";
             }
 
-            // Check if an active user with this email already exists
-            $existingUser = User::withTrashed()->where('login_identifier', $nisn)->first();
-            if (!$existingUser || !$existingUser->trashed()) {
-                if (User::where('email', $email)->exists()) {
-                    $errors[] = "Email {$email} sudah digunakan.";
-                }
+            // Check if a user with this login_identifier already exists
+            $existingUser = User::withTrashed()->where('login_identifier', $loginId)->first();
+            if ($existingUser && !$existingUser->trashed()) {
+                $errors[] = "Login ID {$loginId} sudah digunakan.";
             }
 
             if (!empty($errors)) {
@@ -88,23 +87,22 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
 
             if ($existingUser) {
                 // Restore and reuse the soft-deleted user
-                DB::transaction(function () use ($existingUser, $name, $nisn, $email, $gender) {
+                DB::transaction(function () use ($existingUser, $name, $loginId, $nip, $gender, $specialization) {
                     $existingUser->restore();
                     $existingUser->update([
                         'full_name' => $name,
-                        'email' => $email,
                         'gender' => $gender,
-                        'password' => Hash::make('Siswa' . $nisn),
+                        'password' => Hash::make('Guru' . $loginId),
                     ]);
 
-                    if (!$existingUser->hasRole('student')) {
-                        $existingUser->assignRole('student');
+                    if (!$existingUser->hasRole('teacher')) {
+                        $existingUser->assignRole('teacher');
                     }
 
-                    Student::create([
-                        'user_id'         => $existingUser->id,
-                        'nisn'            => $nisn,
-                        'enrollment_year' => $this->enrollmentYear,
+                    Teacher::create([
+                        'user_id'        => $existingUser->id,
+                        'nip'            => $nip,
+                        'specialization' => $specialization,
                     ]);
                 });
 
@@ -112,21 +110,20 @@ class StudentsImport implements ToArray, WithHeadingRow, WithChunkReading
                 continue;
             }
 
-            DB::transaction(function () use ($name, $nisn, $email, $gender) {
+            DB::transaction(function () use ($name, $loginId, $nip, $gender, $specialization) {
                 $user = User::create([
                     'full_name'        => $name,
-                    'login_identifier' => $nisn,
-                    'email'            => $email,
+                    'login_identifier' => $loginId,
                     'gender'           => $gender,
-                    'password'         => Hash::make('Siswa' . $nisn),
+                    'password'         => Hash::make('Guru' . $loginId),
                 ]);
 
-                $user->assignRole('student');
+                $user->assignRole('teacher');
 
-                Student::create([
-                    'user_id'         => $user->id,
-                    'nisn'            => $nisn,
-                    'enrollment_year' => $this->enrollmentYear,
+                Teacher::create([
+                    'user_id'        => $user->id,
+                    'nip'            => $nip,
+                    'specialization' => $specialization,
                 ]);
             });
 
